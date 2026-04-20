@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <!-- this includes like everything important in the build folder, apparently necessary to get the nuget assemblies -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -14,7 +14,7 @@
       <UABEABinDir>$(SolutionDir)UABEAvalonia\$(OutputPath)</UABEABinDir>
     </PropertyGroup>
 
-    <Copy SourceFiles="$(OutputPath)AudioClipPlugin.dll;$(OutputPath)Fmod5Sharp.dll;$(OutputPath)NAudio.Core.dll;$(OutputPath)OggVorbisEncoder.dll;$(OutputPath)System.Text.Json.dll" DestinationFolder="$(UABEABinDir)plugins" ContinueOnError="true" />
+    <Copy SourceFiles="$(OutputPath)AudioClipPlugin.dll;$(OutputPath)Fmod5Sharp.dll;$(OutputPath)NAudio.Core.dll;$(OutputPath)OggVorbisEncoder.dll" DestinationFolder="$(UABEABinDir)plugins" ContinueOnError="true" />
   </Target>
   <!-- publish event -->
   <Target Name="CopyLibrariesPublish" AfterTargets="Publish" Condition="'$(SolutionDir)' != '*Undefined*'">
@@ -22,7 +22,7 @@
       <UABEABinDir>$(SolutionDir)UABEAvalonia\$(PublishDir)</UABEABinDir>
     </PropertyGroup>
 
-    <Copy SourceFiles="$(OutputPath)AudioClipPlugin.dll;$(OutputPath)Fmod5Sharp.dll;$(OutputPath)NAudio.Core.dll;$(OutputPath)OggVorbisEncoder.dll;$(OutputPath)System.Text.Json.dll" DestinationFolder="$(UABEABinDir)plugins" ContinueOnError="true" />
+    <Copy SourceFiles="$(OutputPath)AudioClipPlugin.dll;$(OutputPath)Fmod5Sharp.dll;$(OutputPath)NAudio.Core.dll;$(OutputPath)OggVorbisEncoder.dll" DestinationFolder="$(UABEABinDir)plugins" ContinueOnError="true" />
   </Target>
 
   <ItemGroup>

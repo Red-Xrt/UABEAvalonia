@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexturePlugin", "TexturePlu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexturePluginPreview", "TexturePluginPreview\TexturePluginPreview.csproj", "{407F80BC-7B93-40DB-ADE0-DD4BCC749D1C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TexToolWrap", "TexToolWrap\TexToolWrap.vcxproj", "{00E173EB-6B49-4055-A00E-18DBB1283C5B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextAssetPlugin", "TextAssetPlugin\TextAssetPlugin.csproj", "{B334A509-14E0-4413-83C7-BA2439A40394}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioClipPlugin", "AudioClipPlugin\AudioClipPlugin.csproj", "{57B84056-BCA6-4D18-BBE1-59305F7ED5B3}"
