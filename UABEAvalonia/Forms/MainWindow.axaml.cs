@@ -136,14 +136,12 @@ namespace UABEAvalonia
                     }
                 }
 
-                // shouldn't be possible but just in case
                 if (openInfoWindows.Count > 0)
                 {
-                    await MessageBoxUtil.ShowDialog(this,
-                        "Warning", "You cannot open two info windows at the same time. " +
-                                   "Consider opening two separate UABEA windows if you " +
-                                   "want two different games' files open at once.");
-
+                    InfoWindow existingInfo = openInfoWindows[0];
+                    existingInfo.LoadData(am, fileInstances, false);
+                    existingInfo.Show();
+                    existingInfo.Activate();
                     return;
                 }
 
@@ -372,9 +370,14 @@ namespace UABEAvalonia
                 if (!await LoadOrAskTypeData(fileInst))
                     return;
 
-                // don't check for info open here
-                // we're assuming it's fine since two infos can
-                // be opened from a bundle without problems
+                if (openInfoWindows.Count > 0)
+                {
+                    InfoWindow existingInfo = openInfoWindows[0];
+                    existingInfo.LoadData(am, new List<AssetsFileInstance> { fileInst }, true);
+                    existingInfo.Show();
+                    existingInfo.Activate();
+                    return;
+                }
 
                 InfoWindow info = new InfoWindow(am, new List<AssetsFileInstance> { fileInst }, true);
                 info.Closing += InfoWindow_Closing;

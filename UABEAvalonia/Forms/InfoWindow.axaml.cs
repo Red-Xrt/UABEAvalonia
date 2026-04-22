@@ -20,7 +20,7 @@ namespace UABEAvalonia
     public partial class InfoWindow : Window
     {
         //todo, rework all this
-        public AssetWorkspace Workspace { get; }
+        public AssetWorkspace Workspace { get; private set; }
         public AssetsManager am { get => Workspace.am; }
 
         //searching
@@ -33,6 +33,9 @@ namespace UABEAvalonia
         private bool ignoreCloseEvent;
 
         private HashSet<AssetClassID> filteredOutTypeIds;
+
+        private bool fromBundle;
+        private List<AssetsFileInstance> assetsFiles;
 
         //would prefer using a stream over byte[] but whatever, will for now
         public List<Tuple<AssetsFileInstance, byte[]>> ChangedAssetsDatas { get; set; }
@@ -77,8 +80,34 @@ namespace UABEAvalonia
             btnPlugin.Click += BtnPlugin_Click;
             dataGrid.SelectionChanged += DataGrid_SelectionChanged;
             Closing += InfoWindow_Closing;
+            boxSearch.TextChanged += BoxSearch_TextChanged;
 
             ignoreCloseEvent = false;
+        }
+
+        private void BoxSearch_TextChanged(object? sender, TextChangedEventArgs e)
+        {
+            var searchText = boxSearch.Text?.ToLower() ?? string.Empty;
+
+            if (dgcv != null)
+            {
+                if (string.IsNullOrWhiteSpace(searchText))
+                {
+                    dgcv.Filter = null;
+                }
+                else
+                {
+                    dgcv.Filter = (obj) =>
+                    {
+                        if (obj is AssetInfoDataGridItem item)
+                        {
+                            return (item.Name != null && item.Name.ToLower().Contains(searchText)) ||
+                                   (item.Type != null && item.Type.ToLower().Contains(searchText));
+                        }
+                        return false;
+                    };
+                }
+            }
         }
 
         private void InfoWindow_KeyDown(object? sender, KeyEventArgs e)
@@ -91,16 +120,7 @@ namespace UABEAvalonia
 
         public InfoWindow(AssetsManager assetsManager, List<AssetsFileInstance> assetsFiles, bool fromBundle) : this()
         {
-            Workspace = new AssetWorkspace(assetsManager, fromBundle);
-            Workspace.ItemUpdated += Workspace_ItemUpdated;
-            Workspace.MonoTemplateLoadFailed += Workspace_MonoTemplateLoadFailed;
-
-            LoadAllAssetsWithDeps(assetsFiles);
-            SetupContainers();
-            MakeDataGridItems();
-            dataGrid.ItemsSource = dataGridItems;
-
-            dgcv = GetDataGridCollectionView(dataGrid);
+            LoadData(assetsManager, assetsFiles, fromBundle);
 
             pluginManager = new PluginManager();
             pluginManager.LoadPluginsInDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"));
@@ -112,8 +132,36 @@ namespace UABEAvalonia
             searching = false;
 
             filteredOutTypeIds = new HashSet<AssetClassID>();
+        }
 
+        public void LoadData(AssetsManager assetsManager, List<AssetsFileInstance> assetsFiles, bool fromBundle)
+        {
             ChangedAssetsDatas = new List<Tuple<AssetsFileInstance, byte[]>>();
+            this.assetsFiles = assetsFiles;
+            this.fromBundle = fromBundle;
+
+            if (Workspace != null)
+            {
+                Workspace.ItemUpdated -= Workspace_ItemUpdated;
+                Workspace.MonoTemplateLoadFailed -= Workspace_MonoTemplateLoadFailed;
+            }
+
+            Workspace = new AssetWorkspace(assetsManager, fromBundle);
+            Workspace.ItemUpdated += Workspace_ItemUpdated;
+            Workspace.MonoTemplateLoadFailed += Workspace_MonoTemplateLoadFailed;
+
+            LoadAllAssetsWithDeps(assetsFiles);
+            SetupContainers();
+            MakeDataGridItems();
+            dataGrid.ItemsSource = dataGridItems;
+
+            dgcv = GetDataGridCollectionView(dataGrid);
+
+            boxSearch.Text = string.Empty;
+            boxName.Text = string.Empty;
+            boxPathId.Text = string.Empty;
+            boxFileId.Text = string.Empty;
+            boxType.Text = string.Empty;
         }
 
         private async void MenuAdd_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
