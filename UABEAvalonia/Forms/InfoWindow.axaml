@@ -37,8 +37,11 @@
         <MenuItem Header="Scene Hierarchy" HotKey="F8" InputGesture="F8" Name="menuHierarchy" />
       </MenuItem>
     </Menu>
-    <TextBlock Margin="10,32,10,0" VerticalAlignment="Top" Text="Assets" />
-    <Border Margin="10,53,200,10" BorderBrush="Black" BorderThickness="1">
+    <Grid Margin="10,32,200,0" VerticalAlignment="Top" ColumnDefinitions="Auto, *">
+      <TextBlock Text="Assets" VerticalAlignment="Center" Margin="0,0,10,0" />
+      <TextBox Grid.Column="1" Name="boxSearch" Watermark="Search by name..." Height="20" />
+    </Grid>
+    <Border Margin="10,65,200,10" BorderBrush="Black" BorderThickness="1">
       <DataGrid AutoGenerateColumns="False" CanUserResizeColumns="True" IsReadOnly="True" Name="dataGrid">
         <DataGrid.RowTheme>
           <ControlTheme TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
