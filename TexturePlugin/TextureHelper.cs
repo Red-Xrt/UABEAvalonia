@@ -1,6 +1,7 @@
 ﻿using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using AssetsTools.NET.Texture;
+using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
@@ -44,8 +45,8 @@ namespace TexturePlugin
                 AssetBundleFile bundle = fileInst.parentBundle.file;
 
                 AssetsFileReader reader = bundle.DataReader;
-                AssetBundleDirectoryInfo[] dirInf = bundle.BlockAndDirInfo.DirectoryInfos;
-                for (int i = 0; i < dirInf.Length; i++)
+                List<AssetBundleDirectoryInfo> dirInf = bundle.BlockAndDirInfo.DirectoryInfos;
+                for (int i = 0; i < dirInf.Count; i++)
                 {
                     AssetBundleDirectoryInfo info = dirInf[i];
                     if (info.Name == searchPath)

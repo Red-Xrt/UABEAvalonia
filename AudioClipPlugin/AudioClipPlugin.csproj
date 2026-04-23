@@ -26,9 +26,8 @@
   </Target>
 
   <ItemGroup>
-    <Reference Include="AssetsTools.NET">
-      <HintPath>..\Libs\AssetsTools.NET.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj" />
+
   </ItemGroup>
 
   <ItemGroup>

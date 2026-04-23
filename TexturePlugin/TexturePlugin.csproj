@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AssetRipper.TextureDecoder" Version="1.2.0" />
+    <PackageReference Include="AssetRipper.TextureDecoder" Version="2.1.1" />
     <PackageReference Include="Avalonia" Version="11.0.1" />
     <PackageReference Include="Avalonia.Desktop" Version="11.0.1" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.0.1" />
@@ -25,12 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="AssetsTools.NET">
-      <HintPath>..\Libs\AssetsTools.NET.dll</HintPath>
-    </Reference>
-	<Reference Include="AssetsTools.NET.Texture">
-	  <HintPath>..\Libs\AssetsTools.NET.Texture.dll</HintPath>
-	</Reference>
+    <ProjectReference Include="..\AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj" />
+
+	<ProjectReference Include="..\AssetsTools\AssetsTools\AssetsTools.NET.Texture\AssetsTools.NET.Texture.csproj" />
+
   </ItemGroup>
   
   <PropertyGroup>

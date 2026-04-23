@@ -1,5 +1,6 @@
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
+using UABEAvalonia.Logic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -11,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UABEAvalonia.Logic;
 
 namespace UABEAvalonia
 {
@@ -20,7 +22,7 @@ namespace UABEAvalonia
         public AssetsManager am { get => Workspace.am; }
         public BundleFileInstance BundleInst { get => Workspace.BundleInst; }
 
-        //private Dictionary<string, BundleReplacer> newFiles;
+        //private Dictionary<string, IContentReplacer> newFiles;
         private bool changesUnsaved; // sets false after saving
         private bool changesMade; // stays true even after saving
         private bool ignoreCloseEvent;
@@ -419,7 +421,7 @@ namespace UABEAvalonia
 
             string dir = selectedFolderPaths[0];
 
-            for (int i = 0; i < BundleInst.file.BlockAndDirInfo.DirectoryInfos.Length; i++)
+            for (int i = 0; i < BundleInst.file.BlockAndDirInfo.DirectoryInfos.Count; i++)
             {
                 AssetBundleDirectoryInfo dirInf = BundleInst.file.BlockAndDirInfo.DirectoryInfos[i];
 
@@ -919,11 +921,11 @@ namespace UABEAvalonia
 
         private void SaveBundle(BundleFileInstance bundleInst, string path)
         {
-            List<BundleReplacer> replacers = Workspace.GetReplacers();
+            Workspace.ApplyChanges();
             using (FileStream fs = File.Open(path, FileMode.Create))
             using (AssetsFileWriter w = new AssetsFileWriter(fs))
             {
-                bundleInst.file.Write(w, replacers.ToList());
+                bundleInst.file.Write(w);
             }
             changesUnsaved = false;
         }
@@ -972,7 +974,7 @@ namespace UABEAvalonia
             using (FileStream fs = File.Open(path, FileMode.Create))
             using (AssetsFileWriter w = new AssetsFileWriter(fs))
             {
-                bundleInst.file.Pack(bundleInst.file.Reader, w, compType, true, progress);
+                bundleInst.file.Pack(w, compType, true, progress);
             }
         }
 

@@ -152,7 +152,7 @@ namespace TexturePlugin
 
         private static byte[] DecodeAssetRipperTex(byte[] data, int width, int height, TextureFormat format)
         {
-            byte[] dest = TextureFile.DecodeManaged(data, format, width, height);
+            byte[] dest = TextureFile.DecodeManagedData(data, format, width, height);
 
             for (int i = 0; i < dest.Length; i += 4)
             {

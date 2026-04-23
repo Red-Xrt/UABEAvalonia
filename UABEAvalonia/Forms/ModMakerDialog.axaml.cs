@@ -1,5 +1,6 @@
 using AssetsTools.NET;
 using Avalonia;
+using UABEAvalonia.Logic;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using System.Collections.Generic;
@@ -238,12 +239,14 @@ namespace UABEAvalonia
 
                     ModMakerTreeFileInfo fileItem = fileToTvi[file];
 
-                    foreach (AssetsReplacer replacer in affectedFile.replacers)
+                    foreach (object replacer in affectedFile.replacers)
                     {
-                        AssetID assetId = new AssetID(file, replacer.GetPathID());
+                        // FIX: Emip.cs needs to parse pathId from replacers or we change the signature.
 
                         var obsItems = fileItem.Replacers;
-                        obsItems.Add(new ModMakerTreeReplacerInfo(assetId, replacer));
+                        EmipReplacerWrapper wrapper = (EmipReplacerWrapper)replacer;
+AssetID assetId = new AssetID(file, wrapper.PathId);
+obsItems.Add(new ModMakerTreeReplacerInfo(assetId, wrapper.Replacer));
                     }
                 }
             }
@@ -345,12 +348,12 @@ namespace UABEAvalonia
     {
         public bool isBundle;
         public AssetID assetId;
-        public AssetsReplacer assetsReplacer;
-        //public BundleReplacer bundleReplacer;
+        public IContentReplacer assetsReplacer;
+        //public IContentReplacer bundleReplacer;
 
         public string DisplayText { get => ToString(); }
 
-        public ModMakerTreeReplacerInfo(AssetID assetId, AssetsReplacer assetsReplacer)
+        public ModMakerTreeReplacerInfo(AssetID assetId, IContentReplacer assetsReplacer)
         {
             isBundle = false;
             this.assetId = assetId;
@@ -361,10 +364,10 @@ namespace UABEAvalonia
         {
             if (!isBundle)
             {
-                if (assetsReplacer is AssetsRemover)
-                    return $"Remove path id {assetsReplacer.GetPathID()}";
-                else //if (replacer is AssetsReplacerFromMemory || replacer is AssetsReplacerFromStream)
-                    return $"Replace path id {assetsReplacer.GetPathID()}";
+                if (assetsReplacer is ContentRemover)
+                    return $"Remove path id {assetId.pathID}";
+                else //if (replacer is IContentReplacerFromMemory || replacer is IContentReplacerFromStream)
+                    return $"Replace path id {assetId.pathID}";
             }
             else
             {

@@ -144,7 +144,7 @@ namespace UABEAvalonia
                 assetBytes = new byte[0];
             }
 
-            workspace.AddReplacer(file, new AssetsReplacerFromMemory(pathId, typeId, monoId, assetBytes), new MemoryStream(assetBytes));
+            workspace.AddReplacer(file, new ContentReplacerFromBuffer(assetBytes), pathId, typeId, monoId, new MemoryStream(assetBytes));
 
             Close(true);
         }

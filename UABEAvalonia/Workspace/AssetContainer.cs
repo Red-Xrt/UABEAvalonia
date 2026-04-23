@@ -38,7 +38,7 @@ namespace UABEAvalonia
         // existing assets
         public AssetContainer(AssetFileInfo info, AssetsFileInstance fileInst, AssetTypeValueField? baseField = null)
         {
-            FilePosition = info.AbsoluteByteStart;
+            FilePosition = info.GetAbsoluteByteOffset(fileInst.file);
             FileReader = fileInst.file.Reader;
 
             PathId = info.PathId;
@@ -103,7 +103,7 @@ namespace UABEAvalonia
                 throw new Exception("Missed an asset during save. Path ID: " + PathId);
             }
 
-            FilePosition = info.AbsoluteByteStart;
+            FilePosition = info.GetAbsoluteByteOffset(fileInst.file);
             FileReader = fileInst.file.Reader;
         }
     }
