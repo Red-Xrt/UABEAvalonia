@@ -37,8 +37,8 @@ namespace UABEAvalonia
 
                     if (ttType != null && ttType.Nodes.Count > 0)
                     {
-                        typeName = ttType.Nodes[0].GetTypeString(ttType.StringBuffer);
-                        if (ttType.Nodes.Count > 1 && ttType.Nodes[1].GetNameString(ttType.StringBuffer) == "m_Name")
+                        typeName = ttType.Nodes[0].GetTypeString(ttType.StringBufferBytes);
+                        if (ttType.Nodes.Count > 1 && ttType.Nodes[1].GetNameString(ttType.StringBufferBytes) == "m_Name")
                         {
                             reader.Position = filePosition;
                             assetName = reader.ReadCountStringInt32();

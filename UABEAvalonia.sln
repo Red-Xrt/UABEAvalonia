@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioClipPlugin", "AudioCli
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontPlugin", "FontPlugin\FontPlugin.csproj", "{9C582792-C3AA-4854-9DB5-26AF330ACDDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools", "AssetsTools\AssetsTools.csproj", "{8DAA6B1F-C8A2-49EA-909E-DDE7F314231F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools", "AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj", "{8DAA6B1F-C8A2-49EA-909E-DDE7F314231F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

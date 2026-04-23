@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET;
+using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using Avalonia.Media;
 using System;
@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UABEAvalonia
 {
@@ -74,12 +72,9 @@ namespace UABEAvalonia
                 }
                 else
                 {
-                    // shouldn't happen
                     wsItem = new BundleWorkspaceItem(name, prevName, false, isSerialized, true, stream);
                 }
 
-                // don't close if not new because we would close the
-                // underlying bundle stream
                 if (FileLookup[prevName].IsNew)
                 {
                     FileLookup[prevName].Stream.Close();
@@ -90,7 +85,7 @@ namespace UABEAvalonia
             }
             else
             {
-                BundleWorkspaceItem wsItem = new BundleWorkspaceItem(name, name, false, isSerialized, true, stream);
+                BundleWorkspaceItem wsItem = new BundleWorkspaceItem(name, name, true, isSerialized, true, stream);
 
                 Files.Add(wsItem);
                 FileLookup[name] = wsItem;
@@ -108,32 +103,54 @@ namespace UABEAvalonia
             }
         }
 
-        public List<BundleReplacer> GetReplacers()
+        public void ApplyChanges()
         {
-            List<BundleReplacer> replacers = new List<BundleReplacer>();
+            if (BundleInst == null) return;
+
+            var dirInfosList = BundleInst.file.BlockAndDirInfo.DirectoryInfos.ToList();
             
+            // Mark removed
             foreach (string name in RemovedFiles)
             {
-                BundleReplacer replacer = new BundleRemover(name);
-                replacers.Add(replacer);
+                var dir = dirInfosList.FirstOrDefault(d => d.Name == name);
+                if (dir != null)
+                {
+                    dir.Replacer = new ContentRemover();
+                }
             }
 
+            // Handle modified/renamed/new
             foreach (BundleWorkspaceItem item in FileLookup.Values)
             {
-                if (!item.IsRemoved)
+                if (item.IsRemoved) continue;
+
+                if (item.IsNew)
                 {
-                    if (item.IsModified)
+                    var newDir = new AssetBundleDirectoryInfo
                     {
-                        replacers.Add(new BundleReplacerFromStream(item.OriginalName, item.Name, item.IsSerialized, item.Stream, 0, -1));
-                    }
-                    else if (item.Name != item.OriginalName)
+                        Name = item.Name,
+                        Offset = 0,
+                        DecompressedSize = item.Stream.Length,
+                        Flags = item.IsSerialized ? 4u : 0u,
+                        Replacer = new ContentReplacerFromStream(item.Stream, 0, -1)
+                    };
+                    dirInfosList.Add(newDir);
+                }
+                else
+                {
+                    var targetDir = dirInfosList.FirstOrDefault(d => d.Name == item.OriginalName);
+                    if (targetDir != null)
                     {
-                        replacers.Add(new BundleRenamer(item.OriginalName, item.Name));
+                        targetDir.Name = item.Name; // Apply rename if any
+                        if (item.IsModified)
+                        {
+                            targetDir.Replacer = new ContentReplacerFromStream(item.Stream, 0, -1);
+                        }
                     }
                 }
             }
 
-            return replacers;
+            BundleInst.file.BlockAndDirInfo.DirectoryInfos = dirInfosList;
         }
     }
     
@@ -144,9 +161,6 @@ namespace UABEAvalonia
         public bool IsNew { get; }
         public bool IsSerialized { get; }
         public bool IsRemoved { get; set; }
-        // the difference between IsNew and IsModified is
-        // IsNew is only if it was a newly imported file
-        // but IsModified comes from edits by the info window
         public bool IsModified { get; }
         public Stream Stream { get; }
 
@@ -190,7 +204,6 @@ namespace UABEAvalonia
             IsSerialized = isSerialized;
             IsModified = isModified;
             Stream = stream;
-            //Replacer = null;
 
             IsRemoved = false;
         }

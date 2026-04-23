@@ -442,7 +442,7 @@ namespace UABEAvalonia
                 List<AssetContainer> selection = GetSelectedAssetsReplaced();
                 foreach (AssetContainer cont in selection)
                 {
-                    Workspace.AddReplacer(cont.FileInstance, new AssetsRemover(cont.PathId));
+                    Workspace.AddReplacer(cont.FileInstance, new ContentRemover(), cont.PathId, cont.ClassId, cont.MonoId);
                 }
             }
         }
@@ -519,19 +519,19 @@ namespace UABEAvalonia
 
         private async Task SaveFile(bool saveAs)
         {
-            var fileToReplacer = new Dictionary<AssetsFileInstance, List<AssetsReplacer>>();
+            var fileToReplacer = new Dictionary<AssetsFileInstance, List<IContentReplacer>>();
             var changedFiles = Workspace.GetChangedFiles();
 
             foreach (var newAsset in Workspace.NewAssets)
             {
                 AssetID assetId = newAsset.Key;
-                AssetsReplacer replacer = newAsset.Value;
+                IContentReplacer replacer = newAsset.Value;
                 string fileName = assetId.fileName;
 
                 if (Workspace.LoadedFileLookup.TryGetValue(fileName.ToLower(), out AssetsFileInstance? file))
                 {
                     if (!fileToReplacer.ContainsKey(file))
-                        fileToReplacer[file] = new List<AssetsReplacer>();
+                        fileToReplacer[file] = new List<IContentReplacer>();
 
                     fileToReplacer[file].Add(replacer);
                 }
@@ -542,18 +542,18 @@ namespace UABEAvalonia
                 ChangedAssetsDatas.Clear();
                 foreach (var file in changedFiles)
                 {
-                    List<AssetsReplacer> replacers;
+                    List<IContentReplacer> replacers;
                     if (fileToReplacer.ContainsKey(file))
                         replacers = fileToReplacer[file];
                     else
-                        replacers = new List<AssetsReplacer>(0);
+                        replacers = new List<IContentReplacer>(0);
 
                     try
                     {
                         using (MemoryStream ms = new MemoryStream())
                         using (AssetsFileWriter w = new AssetsFileWriter(ms))
                         {
-                            file.file.Write(w, 0, replacers);
+                            file.file.Write(w);
                             ChangedAssetsDatas.Add(new Tuple<AssetsFileInstance, byte[]>(file, ms.ToArray()));
                         }
                     }
@@ -572,11 +572,11 @@ namespace UABEAvalonia
 
                 foreach (var file in changedFiles)
                 {
-                    List<AssetsReplacer> replacers;
+                    List<IContentReplacer> replacers;
                     if (fileToReplacer.ContainsKey(file))
                         replacers = fileToReplacer[file];
                     else
-                        replacers = new List<AssetsReplacer>(0);
+                        replacers = new List<IContentReplacer>(0);
 
                     string? filePath;
 
@@ -620,7 +620,7 @@ namespace UABEAvalonia
                         using (FileStream fs = File.Open(filePath, FileMode.Create))
                         using (AssetsFileWriter w = new AssetsFileWriter(fs))
                         {
-                            file.file.Write(w, 0, replacers);
+                            file.file.Write(w);
                         }
 
                         if (!saveAs)
@@ -873,8 +873,8 @@ namespace UABEAvalonia
                         AssetImportExport importer = new AssetImportExport();
                         byte[] bytes = importer.ImportRawAsset(fs);
 
-                        AssetsReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
-                        Workspace.AddReplacer(selectedInst, replacer, new MemoryStream(bytes));
+                        IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                        Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
                     }
                 }
             }
@@ -905,8 +905,8 @@ namespace UABEAvalonia
                 AssetImportExport importer = new AssetImportExport();
                 byte[] bytes = importer.ImportRawAsset(fs);
 
-                AssetsReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
-                Workspace.AddReplacer(selectedInst, replacer, new MemoryStream(bytes));
+                IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
             }
         }
 
@@ -969,8 +969,8 @@ namespace UABEAvalonia
                             return;
                         }
 
-                        AssetsReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
-                        Workspace.AddReplacer(selectedInst, replacer, new MemoryStream(bytes));
+                        IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                        Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
                     }
                 }
             }
@@ -1020,8 +1020,8 @@ namespace UABEAvalonia
                     return;
                 }
 
-                AssetsReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
-                Workspace.AddReplacer(selectedInst, replacer, new MemoryStream(bytes));
+                IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
             }
         }
 
@@ -1041,8 +1041,8 @@ namespace UABEAvalonia
                 return false;
             }
 
-            AssetsReplacer replacer = AssetImportExport.CreateAssetReplacer(cont, data);
-            Workspace.AddReplacer(cont.FileInstance, replacer, new MemoryStream(data));
+            IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(cont, data);
+            Workspace.AddReplacer(cont.FileInstance, replacer, cont.PathId, cont.ClassId, cont.MonoId, new MemoryStream(data));
             return true;
         }
 

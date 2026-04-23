@@ -229,8 +229,8 @@ namespace AudioPlugin
                 AssetBundleFile bundle = cont.FileInstance.parentBundle.file;
 
                 AssetsFileReader reader = bundle.DataReader;
-                AssetBundleDirectoryInfo[] dirInf = bundle.BlockAndDirInfo.DirectoryInfos;
-                for (int i = 0; i < dirInf.Length; i++)
+                List<AssetBundleDirectoryInfo> dirInf = bundle.BlockAndDirInfo.DirectoryInfos;
+                for (int i = 0; i < dirInf.Count; i++)
                 {
                     AssetBundleDirectoryInfo info = dirInf[i];
                     if (info.Name == searchPath)

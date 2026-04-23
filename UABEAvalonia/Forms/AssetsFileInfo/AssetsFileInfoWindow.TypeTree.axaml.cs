@@ -76,7 +76,7 @@ namespace UABEAvalonia
                 else
                 {
                     TypeTreeNode baseField = type.Nodes[0];
-                    typeName = baseField.GetTypeString(type.StringBuffer);
+                    typeName = baseField.GetTypeString(type.StringBufferBytes);
                 }
 
                 string scriptIndexStr = string.Empty;
@@ -103,7 +103,7 @@ namespace UABEAvalonia
             else
             {
                 TypeTreeNode baseField = type.Nodes[0];
-                boxTypeTreeType.Text = baseField.GetTypeString(type.StringBuffer);
+                boxTypeTreeType.Text = baseField.GetTypeString(type.StringBufferBytes);
             }
 
             boxTypeTreeTypeId.Text = $"{type.TypeId} (0x{type.TypeId:x})";
@@ -181,8 +181,7 @@ namespace UABEAvalonia
 
         private string TypeFieldToString(TypeTreeNode node, TypeTreeType type)
         {
-            string stringTable = type.StringBuffer;
-            return $"{node.GetTypeString(stringTable)} {node.GetNameString(stringTable)}";
+            return $"{node.GetTypeString(type.StringBufferBytes)} {node.GetNameString(type.StringBufferBytes)}";
         }
 
         private class TypeTreeListItem
