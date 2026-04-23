@@ -696,24 +696,24 @@ namespace UABEAvalonia
                 .Replace("\n", "\\n");
         }
         
-        public static AssetsReplacer CreateAssetReplacer(AssetContainer cont, byte[] data)
+        public static IContentReplacer CreateAssetReplacer(AssetContainer cont, byte[] data)
         {
-            return new AssetsReplacerFromMemory(cont.PathId, cont.ClassId, cont.MonoId, data);
+            return new ContentReplacerFromBuffer(data);
         }
 
-        public static BundleReplacer CreateBundleReplacer(string name, bool isSerialized, byte[] data)
+        public static IContentReplacer CreateBundleReplacerFromMemory(string name, bool isSerialized, byte[] data)
         {
-            return new BundleReplacerFromMemory(name, name, isSerialized, data, -1);
+            return new ContentReplacerFromBuffer(data);
         }
 
-        public static BundleReplacer CreateBundleReplacer(string name, bool isSerialized, Stream stream, long start, long size)
+        public static IContentReplacer CreateBundleReplacerFromStream(string name, bool isSerialized, Stream stream, long start, int size)
         {
-            return new BundleReplacerFromStream(name, name, isSerialized, stream, start, size);
+            return new ContentReplacerFromStream(stream, start, size, false);
         }
 
-        public static BundleReplacer CreateBundleRemover(string name, bool isSerialized, int bundleListIndex = -1)
+        public static IContentReplacer CreateBundleRemover(string name, bool isSerialized, int bundleListIndex = -1)
         {
-            return new BundleRemover(name, bundleListIndex);
+            return new ContentRemover();
         }
     }
 }

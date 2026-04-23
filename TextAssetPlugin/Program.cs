@@ -78,10 +78,9 @@ namespace TextAssetPlugin
 
                 byte[] savedAsset = baseField.WriteToByteArray();
 
-                var replacer = new AssetsReplacerFromMemory(
-                    cont.PathId, cont.ClassId, cont.MonoId, savedAsset);
+                var replacer = new ContentReplacerFromBuffer(savedAsset);
 
-                workspace.AddReplacer(cont.FileInstance, replacer, new MemoryStream(savedAsset));
+                workspace.AddReplacer(cont.FileInstance, replacer, cont.PathId, cont.ClassId, cont.MonoId, new MemoryStream(savedAsset));
             }
             return true;
         }
@@ -123,10 +122,9 @@ namespace TextAssetPlugin
 
             byte[] savedAsset = baseField.WriteToByteArray();
 
-            var replacer = new AssetsReplacerFromMemory(
-                cont.PathId, cont.ClassId, cont.MonoId, savedAsset);
+            var replacer = new ContentReplacerFromBuffer(savedAsset);
 
-            workspace.AddReplacer(cont.FileInstance, replacer, new MemoryStream(savedAsset));
+            workspace.AddReplacer(cont.FileInstance, replacer, cont.PathId, cont.ClassId, cont.MonoId, new MemoryStream(savedAsset));
             return true;
         }
     }

@@ -1,11 +1,10 @@
-﻿using AssetsTools.NET;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using AssetsTools.NET;
 
-namespace UABEAvalonia
+namespace UABEAvalonia.Logic
 {
     public class InstallerPackageFile
     {
@@ -14,7 +13,7 @@ namespace UABEAvalonia
         public string modName;
         public string modCreators;
         public string modDescription;
-        public ClassDatabaseFile addedTypes;
+        public ClassDatabaseFile? addedTypes;
         public List<InstallerPackageAssetsDesc> affectedFiles;
 
         public bool Read(AssetsFileReader reader, bool prefReplacersInMemory = false)
@@ -35,12 +34,6 @@ namespace UABEAvalonia
             {
                 addedTypes = new ClassDatabaseFile();
                 addedTypes.Read(reader);
-                ////get past the data since the reader goes back to the beginning
-                //reader.Position = 0x16 + addedTypes.Header.CompressedSize;
-            }
-            else
-            {
-                addedTypes = null;
             }
 
             int affectedFilesCount = reader.ReadInt32();
@@ -56,15 +49,8 @@ namespace UABEAvalonia
                 int replacerCount = reader.ReadInt32();
                 for (int j = 0; j < replacerCount; j++)
                 {
-                    object repObj = ParseReplacer(reader, prefReplacersInMemory);
-                    if (repObj is AssetsReplacer repAsset)
-                    {
-                        replacers.Add(repAsset);
-                    }
-                    else if (repObj is BundleReplacer repBundle)
-                    {
-                        replacers.Add(repBundle);
-                    }
+                    var wrapper = ParseReplacer(reader, prefReplacersInMemory);
+                    replacers.Add(wrapper);
                 }
                 desc.replacers = replacers;
                 affectedFiles.Add(desc);
@@ -72,12 +58,12 @@ namespace UABEAvalonia
 
             return true;
         }
+
         public void Write(AssetsFileWriter writer)
         {
             writer.BigEndian = false;
 
             writer.Write(Encoding.ASCII.GetBytes(magic));
-            
             writer.Write(includesCldb);
 
             writer.WriteCountStringInt16(modName);
@@ -86,8 +72,10 @@ namespace UABEAvalonia
 
             if (includesCldb)
             {
-                addedTypes.Write(writer, ClassFileCompressionType.Uncompressed);
-                //writer.Position = 0x16 + addedTypes.Header.CompressedSize;
+                if (addedTypes == null)
+                    writer.Write(0);
+                else
+                    addedTypes.Write(writer, AssetsTools.NET.ClassFileCompressionType.Lz4);
             }
 
             writer.Write(affectedFiles.Count);
@@ -100,20 +88,13 @@ namespace UABEAvalonia
                 writer.Write(desc.replacers.Count);
                 for (int j = 0; j < desc.replacers.Count; j++)
                 {
-                    object repObj = desc.replacers[j];
-                    if (repObj is AssetsReplacer repAsset)
-                    {
-                        repAsset.WriteReplacer(writer);
-                    }
-                    else if (repObj is BundleReplacer repBundle)
-                    {
-                        repBundle.WriteReplacer(writer);
-                    }
+                    var wrapper = (EmipReplacerWrapper)desc.replacers[j];
+                    WriteReplacer(wrapper, writer);
                 }
             }
         }
 
-        private static object ParseReplacer(AssetsFileReader reader, bool prefReplacersInMemory)
+        private static EmipReplacerWrapper ParseReplacer(AssetsFileReader reader, bool prefReplacersInMemory)
         {
             short replacerType = reader.ReadInt16();
             byte fileType = reader.ReadByte();
@@ -123,18 +104,18 @@ namespace UABEAvalonia
                 string newName = reader.ReadCountStringInt16();
                 bool hasSerializedData = reader.ReadByte() != 0; //guess
                 long replacerCount = reader.ReadInt64();
-                List<AssetsReplacer> replacers = new List<AssetsReplacer>();
+                List<IContentReplacer> replacers = new List<IContentReplacer>();
                 for (int i = 0; i < replacerCount; i++)
                 {
-                    AssetsReplacer assetReplacer = (AssetsReplacer)ParseReplacer(reader, prefReplacersInMemory);
-                    replacers.Add(assetReplacer);
+                    var assetReplacer = ParseReplacer(reader, prefReplacersInMemory);
+                    replacers.Add(assetReplacer.Replacer);
                 }
 
                 if (replacerType == 4) //BundleReplacerFromAssets
                 {
                     //we have to null the assetsfile here and call init later
-                    BundleReplacer replacer = new BundleReplacerFromAssets(oldName, newName, null, replacers, 0);
-                    return replacer;
+                    IContentReplacer replacer = new ContentReplacerFromAssets((AssetsFile)null);
+                    return new EmipReplacerWrapper { Replacer = replacer };
                 }
             }
             else if (fileType == 1) //AssetsReplacer
@@ -149,75 +130,121 @@ namespace UABEAvalonia
                 int preloadDependencyCount = reader.ReadInt32();
                 for (int i = 0; i < preloadDependencyCount; i++)
                 {
-                    AssetPPtr pptr = new AssetPPtr(reader.ReadInt32(), reader.ReadInt64());
-                    preloadDependencies.Add(pptr);
+                    int pFileId = reader.ReadInt32();
+                    long pPathId = reader.ReadInt64();
+                    preloadDependencies.Add(new AssetPPtr(pFileId, pPathId));
                 }
 
-                if (replacerType == 0) //remover
+                int propertiesHashCount = reader.ReadInt32();
+                if (propertiesHashCount == 4)
                 {
-                    AssetsReplacer replacer = new AssetsRemover(pathId);
-                    if (preloadDependencyCount != 0)
-                        replacer.SetPreloadDependencies(preloadDependencies);
-
-                    return replacer;
+                    uint pHash0 = reader.ReadUInt32();
+                    uint pHash1 = reader.ReadUInt32();
+                    uint pHash2 = reader.ReadUInt32();
+                    uint pHash3 = reader.ReadUInt32();
                 }
-                else if (replacerType == 2) //adder/replacer?
+
+                int scriptIdHashCount = reader.ReadInt32();
+                if (scriptIdHashCount == 4)
                 {
-                    Hash128? propertiesHash = null;
-                    Hash128? scriptHash = null;
-                    ClassDatabaseFile? classData = null;
-                    AssetsReplacer replacer;
+                    uint sHash0 = reader.ReadUInt32();
+                    uint sHash1 = reader.ReadUInt32();
+                    uint sHash2 = reader.ReadUInt32();
+                    uint sHash3 = reader.ReadUInt32();
+                }
 
-                    bool flag1 = reader.ReadByte() != 0; //no idea, couldn't get it to be 1
-                    if (flag1)
-                    {
-                        throw new NotSupportedException("you just found a file with the mysterious flag1 set, send the file to nes");
-                    }
+                int unknown2 = reader.ReadInt32();
+                if (unknown2 == 1)
+                {
+                    int num6 = reader.ReadInt32();
+                    long num7 = reader.ReadInt64();
+                    int num8 = reader.ReadInt32();
+                    int num9 = reader.ReadInt32();
+                    long num10 = reader.ReadInt64();
+                }
 
-                    bool flag2 = reader.ReadByte() != 0; //has properties hash
-                    if (flag2)
-                    {
-                        propertiesHash = new Hash128(reader);
-                    }
+                if (replacerType == 0) //AssetsRemover
+                {
+                    IContentReplacer replacer = new ContentRemover();
+                    return new EmipReplacerWrapper { PathId = pathId, ClassId = classId, MonoId = monoScriptIndex, Replacer = replacer };
+                }
+                else if (replacerType == 1 || replacerType == 2) //AssetsReplacer
+                {
+                    int bufLength = reader.ReadInt32();
 
-                    bool flag3 = reader.ReadByte() != 0; //has script hash
-                    if (flag3)
-                    {
-                        scriptHash = new Hash128(reader);
-                    }
-
-                    bool flag4 = reader.ReadByte() != 0; //has cldb
-                    if (flag4)
-                    {
-                        classData = new ClassDatabaseFile();
-                        classData.Read(reader);
-                    }
-
-                    long bufLength = reader.ReadInt64();
+                    IContentReplacer replacer;
                     if (prefReplacersInMemory)
                     {
-                        byte[] buf = reader.ReadBytes((int)bufLength);
-                        replacer = new AssetsReplacerFromMemory(pathId, classId, monoScriptIndex, buf);
+                        byte[] buf = reader.ReadBytes(bufLength);
+                        replacer = new ContentReplacerFromBuffer(buf);
                     }
                     else
                     {
-                        replacer = new AssetsReplacerFromStream(pathId, classId, monoScriptIndex, reader.BaseStream, reader.Position, bufLength);
+                        replacer = new ContentReplacerFromStream(reader.BaseStream, reader.Position, bufLength, false);
                         reader.Position += bufLength;
                     }
 
-                    if (propertiesHash != null)
-                        replacer.SetPropertiesHash(propertiesHash.Value);
-                    if (scriptHash != null)
-                        replacer.SetScriptIDHash(scriptHash.Value);
-                    if (scriptHash != null)
-                        replacer.SetTypeInfo(classData, null, false); //idk what the last two are supposed to do
-                    if (preloadDependencyCount != 0)
-                        replacer.SetPreloadDependencies(preloadDependencies);
-
-                    return replacer;
+                    return new EmipReplacerWrapper { PathId = pathId, ClassId = classId, MonoId = monoScriptIndex, Replacer = replacer };
                 }
             }
             return null;
+        }
+
+        private static void WriteReplacer(EmipReplacerWrapper wrapper, AssetsFileWriter writer)
+        {
+            if (wrapper.Replacer is ContentRemover)
+            {
+                writer.Write((short)0); // replacer type
+                writer.Write((byte)1);  // fileType
+                writer.Write((byte)1);
+                writer.Write((int)0);
+                writer.Write(wrapper.PathId);
+                writer.Write(wrapper.ClassId);
+                writer.Write(wrapper.MonoId);
+
+                writer.Write((int)0);
+                writer.Write((int)0);
+                writer.Write((int)0);
+                writer.Write((int)0);
+            }
+            else if (wrapper.Replacer is ContentReplacerFromBuffer bufRep)
+            {
+                writer.Write((short)2); // replacer type
+                writer.Write((byte)1);  // fileType
+                writer.Write((byte)1);
+                writer.Write((int)0);
+                writer.Write(wrapper.PathId);
+                writer.Write(wrapper.ClassId);
+                writer.Write(wrapper.MonoId);
+
+                writer.Write((int)0);
+                writer.Write((int)0);
+                writer.Write((int)0);
+                writer.Write((int)0);
+
+                long size = bufRep.GetSize();
+                writer.Write((int)size);
+                bufRep.Write(writer, false);
+            }
+            else if (wrapper.Replacer is ContentReplacerFromStream strRep)
+            {
+                writer.Write((short)2); // replacer type
+                writer.Write((byte)1);  // fileType
+                writer.Write((byte)1);
+                writer.Write((int)0);
+                writer.Write(wrapper.PathId);
+                writer.Write(wrapper.ClassId);
+                writer.Write(wrapper.MonoId);
+
+                writer.Write((int)0);
+                writer.Write((int)0);
+                writer.Write((int)0);
+                writer.Write((int)0);
+
+                long size = strRep.GetSize();
+                writer.Write((int)size);
+                strRep.Write(writer, false);
+            }
         }
     }
 

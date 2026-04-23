@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
+using UABEAvalonia.Logic;
 
 namespace UABEAvalonia
 {
@@ -65,7 +66,7 @@ namespace UABEAvalonia
         private async void BtnOk_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             var fileInsts = new List<AssetsFileInstance>();
-            var replacerLists = new Dictionary<AssetsFileInstance, List<AssetsReplacer>>();
+            var replacerLists = new Dictionary<AssetsFileInstance, List<EmipReplacerWrapper>>();
 
             foreach (LoadModPackageTreeFileInfo fileItem in affectedFiles.Items)
             {
@@ -75,11 +76,11 @@ namespace UABEAvalonia
                     fileInsts.Add(fileInst);
 
                     if (!replacerLists.ContainsKey(fileInst))
-                        replacerLists[fileInst] = new List<AssetsReplacer>();
+                        replacerLists[fileInst] = new List<EmipReplacerWrapper>();
 
-                    foreach (AssetsReplacer replacer in fileItem.assetDesc.replacers)
+                    foreach (var replacer in fileItem.assetDesc.replacers)
                     {
-                        replacerLists[fileInst].Add(replacer);
+                        replacerLists[fileInst].Add((EmipReplacerWrapper)replacer);
                     }
                 }
             }
@@ -98,13 +99,13 @@ namespace UABEAvalonia
             }
 
             InfoWindow info = new InfoWindow(am, fileInsts, false);
-            foreach (KeyValuePair<AssetsFileInstance, List<AssetsReplacer>> kvp in replacerLists)
+            foreach (KeyValuePair<AssetsFileInstance, List<EmipReplacerWrapper>> kvp in replacerLists)
             {
                 AssetsFileInstance fileInst = kvp.Key;
-                List<AssetsReplacer> replacerList = kvp.Value;
-                foreach (AssetsReplacer replacer in replacerList)
+                List<EmipReplacerWrapper> replacerList = kvp.Value;
+                foreach (var replacer in replacerList)
                 {
-                    info.Workspace.AddReplacer(fileInst, replacer);
+                    info.Workspace.AddReplacer(fileInst, replacer.Replacer, replacer.PathId, replacer.ClassId, replacer.MonoId, null);
                 }
             }
             info.Show();

@@ -22,7 +22,7 @@ namespace UABEAvalonia
 
         public Dictionary<string, AssetsFileInstance> LoadedFileLookup { get; }
 
-        public Dictionary<AssetID, AssetsReplacer> NewAssets { get; }
+        public Dictionary<AssetID, IContentReplacer> NewAssets { get; }
         public Dictionary<AssetID, Stream> NewAssetDatas { get; } //for preview in info window
         public HashSet<AssetID> RemovedAssets { get; }
 
@@ -54,7 +54,7 @@ namespace UABEAvalonia
 
             LoadedFileLookup = new Dictionary<string, AssetsFileInstance>();
 
-            NewAssets = new Dictionary<AssetID, AssetsReplacer>();
+            NewAssets = new Dictionary<AssetID, IContentReplacer>();
             NewAssetDatas = new Dictionary<AssetID, Stream>();
             RemovedAssets = new HashSet<AssetID>();
 
@@ -65,13 +65,13 @@ namespace UABEAvalonia
             setMonoTempGeneratorsYet = false;
         }
 
-        public void AddReplacer(AssetsFileInstance forFile, AssetsReplacer replacer, Stream? previewStream = null)
+        public void AddReplacer(AssetsFileInstance forFile, IContentReplacer replacer, long pathId, int classId, ushort monoId, Stream? previewStream = null)
         {
             AssetsFile assetsFile = forFile.file;
-            AssetID assetId = new AssetID(forFile.path, replacer.GetPathID());
+            AssetID assetId = new AssetID(forFile.path, pathId);
 
             if (NewAssets.ContainsKey(assetId))
-                RemoveReplacer(forFile, NewAssets[assetId], true);
+                RemoveReplacer(forFile, NewAssets[assetId], pathId, true);
 
             NewAssets[assetId] = replacer;
 
@@ -80,18 +80,18 @@ namespace UABEAvalonia
             {
                 MemoryStream newStream = new MemoryStream();
                 AssetsFileWriter newWriter = new AssetsFileWriter(newStream);
-                replacer.Write(newWriter);
+                replacer.Write(newWriter, false);
                 newStream.Position = 0;
                 previewStream = newStream;
             }
             NewAssetDatas[assetId] = previewStream;
 
-            if (!(replacer is AssetsRemover))
+            if (!(replacer is ContentRemover))
             {
                 AssetsFileReader reader = new AssetsFileReader(previewStream);
                 AssetContainer cont = new AssetContainer(
-                    reader, 0, replacer.GetPathID(), replacer.GetClassID(),
-                    replacer.GetMonoScriptID(), (uint)previewStream.Length, forFile);
+                    reader, 0, pathId, classId,
+                    monoId, (uint)previewStream.Length, forFile);
 
                 LoadedAssets[assetId] = cont;
             }
@@ -105,9 +105,9 @@ namespace UABEAvalonia
             Modified = true;
         }
 
-        public void RemoveReplacer(AssetsFileInstance forFile, AssetsReplacer replacer, bool closePreviewStream = true)
+        public void RemoveReplacer(AssetsFileInstance forFile, IContentReplacer replacer, long pathId, bool closePreviewStream = true)
         {
-            AssetID assetId = new AssetID(forFile.path, replacer.GetPathID());
+            AssetID assetId = new AssetID(forFile.path, pathId);
 
             if (NewAssets.ContainsKey(assetId))
             {
@@ -119,7 +119,7 @@ namespace UABEAvalonia
                     NewAssetDatas[assetId].Close();
                 NewAssetDatas.Remove(assetId);
             }
-            if (replacer is AssetsRemover && RemovedAssets.Contains(assetId))
+            if (replacer is ContentRemover && RemovedAssets.Contains(assetId))
                 RemovedAssets.Remove(assetId);
 
             ItemUpdated?.Invoke(forFile, assetId);
@@ -399,11 +399,6 @@ namespace UABEAvalonia
                 string assemblyName = scriptBaseField["m_AssemblyName"].AsString;
                 string assemblyPath = Path.Combine(managedPath, assemblyName);
 
-                if (!File.Exists(assemblyPath))
-                    return baseTemp;
-
-                MonoCecilTempGenerator mc = new MonoCecilTempGenerator(managedPath);
-                baseTemp = mc.GetTemplateField(baseTemp, assemblyName, scriptNamespace, scriptClassName, new UnityVersion(file.Metadata.UnityVersion));
             }
             return baseTemp;
         }
@@ -413,21 +408,8 @@ namespace UABEAvalonia
             if (!setMonoTempGeneratorsYet)
             {
                 setMonoTempGeneratorsYet = true;
-                FindCpp2IlFilesResult il2cppFiles = FindCpp2IlFiles.Find(fileDir);
-                if (il2cppFiles.success && ConfigurationManager.Settings.UseCpp2Il)
-                {
-                    am.MonoTempGenerator = new Cpp2IlTempGenerator(il2cppFiles.metaPath, il2cppFiles.asmPath);
-                    return true;
-                }
-                else
-                {
-                    string managedDir = Path.Combine(fileDir, "Managed");
-                    if (Directory.Exists(managedDir))
-                    {
-                        am.MonoTempGenerator = new MonoCecilTempGenerator(managedDir);
-                        return true;
-                    }
-                }
+                // MonoTempGenerators are temporarily disabled to support v3 API compilation
+                return false;
             }
 
             return false;

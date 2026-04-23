@@ -1,7 +1,9 @@
 ﻿using AssetsTools.NET;
 using AssetsTools.NET.Extra;
+using UABEAvalonia.Logic;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 namespace UABEAvalonia
@@ -130,7 +132,7 @@ namespace UABEAvalonia
                 Console.WriteLine($"Decompressing {file}...");
                 AssetBundleFile bun = DecompressBundle(file, decompFile);
 
-                int entryCount = bun.BlockAndDirInfo.DirectoryInfos.Length;
+                int entryCount = bun.BlockAndDirInfo.DirectoryInfos.Count;
                 for (int i = 0; i < entryCount; i++)
                 {
                     string name = bun.BlockAndDirInfo.DirectoryInfos[i].Name;
@@ -185,10 +187,10 @@ namespace UABEAvalonia
                 Console.WriteLine($"Decompressing {file} to {decompFile}...");
                 AssetBundleFile bun = DecompressBundle(file, decompFile);
 
-                List<BundleReplacer> reps = new List<BundleReplacer>();
+                var dirInfos = bun.BlockAndDirInfo.DirectoryInfos.ToList();
                 List<Stream> streams = new List<Stream>();
 
-                int entryCount = bun.BlockAndDirInfo.DirectoryInfos.Length;
+                int entryCount = bun.BlockAndDirInfo.DirectoryInfos.Count;
                 for (int i = 0; i < entryCount; i++)
                 {
                     string name = bun.BlockAndDirInfo.DirectoryInfos[i].Name;
@@ -198,7 +200,7 @@ namespace UABEAvalonia
                     {
                         FileStream fs = File.OpenRead(matchName);
                         long length = fs.Length;
-                        reps.Add(new BundleReplacerFromStream(name, name, true, fs, 0, length));
+                        bun.BlockAndDirInfo.DirectoryInfos[i].Replacer = new ContentReplacerFromStream(fs, 0, (int)length, false);
                         streams.Add(fs);
                         Console.WriteLine($"Importing {matchName}...");
                     }
@@ -213,7 +215,7 @@ namespace UABEAvalonia
                 using (MemoryStream ms = new MemoryStream())
                 using (AssetsFileWriter w = new AssetsFileWriter(ms))
                 {
-                    bun.Write(w, reps);
+                    bun.Pack(w, AssetsTools.NET.AssetBundleCompressionType.LZ4);
                     data = ms.ToArray();
                 }
                 Console.WriteLine($"Writing changes to {file}...");
@@ -274,26 +276,29 @@ namespace UABEAvalonia
 
                     Console.WriteLine($"Decompressing {affectedFileName} to {decompFile??"memory"}...");
                     AssetBundleFile bun = DecompressBundle(affectedFilePath, decompFile);
-                    List<BundleReplacer> reps = new List<BundleReplacer>();
+                    var dirInfos = bun.BlockAndDirInfo.DirectoryInfos.ToList();
 
                     foreach (var rep in affectedFile.replacers)
                     {
-                        var bunRep = (BundleReplacer)rep;
-                        if (bunRep is BundleReplacerFromAssets)
+                        var bunRep = (EmipReplacerWrapper)rep;
+                        if (bunRep.Replacer is ContentReplacerFromAssets)
                         {
                             //read in assets files from the bundle for replacers that need them
-                            string assetName = bunRep.GetOriginalEntryName();
+                            string assetName = bunRep.OriginalName;
                             var bunRepInf = BundleHelper.GetDirInfo(bun, assetName);
                             long pos = bunRepInf.Offset;
-                            bunRep.Init(bun.DataReader, pos, bunRepInf.DecompressedSize);
+                            // not required
                         }
-                        reps.Add(bunRep);
+                        var dirInfo = dirInfos.FirstOrDefault(d => d.Name == bunRep.OriginalName);
+if (dirInfo != null) dirInfo.Replacer = bunRep.Replacer;
+else dirInfos.Add(new AssetBundleDirectoryInfo { Name = bunRep.NewName, Replacer = bunRep.Replacer });
                     }
 
                     Console.WriteLine($"Writing {modFile}...");
                     FileStream mfs = File.Open(modFile, FileMode.Create);
                     AssetsFileWriter mw = new AssetsFileWriter(mfs);
-                    bun.Write(mw, reps, instPkg.addedTypes); //addedTypes does nothing atm
+                    bun.BlockAndDirInfo.DirectoryInfos = dirInfos;
+bun.Pack(mw, AssetBundleCompressionType.LZ4); //addedTypes does nothing atm
                     
                     mfs.Close();
                     bun.Close();
@@ -319,18 +324,21 @@ namespace UABEAvalonia
                     AssetsFileReader ar = new AssetsFileReader(afs);
                     AssetsFile assets = new AssetsFile();
                     assets.Read(ar);
-                    List<AssetsReplacer> reps = new List<AssetsReplacer>();
+
 
                     foreach (var rep in affectedFile.replacers)
                     {
-                        var assetsReplacer = (AssetsReplacer)rep;
-                        reps.Add(assetsReplacer);
+                        var wrapper = (EmipReplacerWrapper)rep;
+var info = assets.GetAssetInfo(wrapper.PathId);
+if (info != null) info.Replacer = wrapper.Replacer;
+else assets.AssetInfos.Add(new AssetFileInfo { PathId = wrapper.PathId, Replacer = wrapper.Replacer });
+                        // handled
                     }
 
                     Console.WriteLine($"Writing {modFile}...");
                     FileStream mfs = File.Open(modFile, FileMode.Create);
                     AssetsFileWriter mw = new AssetsFileWriter(mfs);
-                    assets.Write(mw, 0, reps, instPkg.addedTypes);
+                    assets.Write(mw);
 
                     mfs.Close();
                     ar.Close();

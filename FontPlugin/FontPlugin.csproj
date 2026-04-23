@@ -19,9 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="AssetsTools.NET">
-      <HintPath>..\Libs\AssetsTools.NET.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj" />
+
   </ItemGroup>
   
   <!-- there seems to be no flag for checking if building  -->
