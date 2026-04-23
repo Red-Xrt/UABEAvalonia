@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET;
+using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;

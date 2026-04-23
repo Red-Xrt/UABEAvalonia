@@ -10,7 +10,7 @@ namespace UABEAvalonia.Logic
         public long PathId { get; set; }
         public int ClassId { get; set; }
         public ushort MonoId { get; set; }
-
+        
         // For Bundles
         public string OriginalName { get; set; }
         public string NewName { get; set; }

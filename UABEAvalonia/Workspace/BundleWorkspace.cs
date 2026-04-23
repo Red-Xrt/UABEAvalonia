@@ -149,7 +149,7 @@ namespace UABEAvalonia
                     }
                 }
             }
-
+            
             BundleInst.file.BlockAndDirInfo.DirectoryInfos = dirInfosList;
         }
     }

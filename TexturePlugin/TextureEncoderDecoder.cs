@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET.Texture;
+using AssetsTools.NET.Texture;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;

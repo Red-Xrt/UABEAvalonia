@@ -162,7 +162,7 @@ namespace UABEAvalonia.Logic
                     int num9 = reader.ReadInt32();
                     long num10 = reader.ReadInt64();
                 }
-
+                
                 if (replacerType == 0) //AssetsRemover
                 {
                     IContentReplacer replacer = new ContentRemover();
@@ -183,13 +183,13 @@ namespace UABEAvalonia.Logic
                         replacer = new ContentReplacerFromStream(reader.BaseStream, reader.Position, bufLength, false);
                         reader.Position += bufLength;
                     }
-
+                    
                     return new EmipReplacerWrapper { PathId = pathId, ClassId = classId, MonoId = monoScriptIndex, Replacer = replacer };
                 }
             }
             return null;
         }
-
+        
         private static void WriteReplacer(EmipReplacerWrapper wrapper, AssetsFileWriter writer)
         {
             if (wrapper.Replacer is ContentRemover)
@@ -201,7 +201,7 @@ namespace UABEAvalonia.Logic
                 writer.Write(wrapper.PathId);
                 writer.Write(wrapper.ClassId);
                 writer.Write(wrapper.MonoId);
-
+                
                 writer.Write((int)0);
                 writer.Write((int)0);
                 writer.Write((int)0);
@@ -216,12 +216,12 @@ namespace UABEAvalonia.Logic
                 writer.Write(wrapper.PathId);
                 writer.Write(wrapper.ClassId);
                 writer.Write(wrapper.MonoId);
-
+                
                 writer.Write((int)0);
                 writer.Write((int)0);
                 writer.Write((int)0);
                 writer.Write((int)0);
-
+                
                 long size = bufRep.GetSize();
                 writer.Write((int)size);
                 bufRep.Write(writer, false);
@@ -235,12 +235,12 @@ namespace UABEAvalonia.Logic
                 writer.Write(wrapper.PathId);
                 writer.Write(wrapper.ClassId);
                 writer.Write(wrapper.MonoId);
-
+                
                 writer.Write((int)0);
                 writer.Write((int)0);
                 writer.Write((int)0);
                 writer.Write((int)0);
-
+                
                 long size = strRep.GetSize();
                 writer.Write((int)size);
                 strRep.Write(writer, false);

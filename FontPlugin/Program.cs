@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET;
+using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;

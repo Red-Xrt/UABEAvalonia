@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET;
+using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using UABEAvalonia.Logic;
 using System;
@@ -324,7 +324,7 @@ bun.Pack(mw, AssetBundleCompressionType.LZ4); //addedTypes does nothing atm
                     AssetsFileReader ar = new AssetsFileReader(afs);
                     AssetsFile assets = new AssetsFile();
                     assets.Read(ar);
-
+                    
 
                     foreach (var rep in affectedFile.replacers)
                     {

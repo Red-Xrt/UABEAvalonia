@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj" />
-
+    
   </ItemGroup>
   
   <!-- there seems to be no flag for checking if building  -->
