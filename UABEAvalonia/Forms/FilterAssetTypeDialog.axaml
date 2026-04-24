@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UABEAvalonia"
         mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="500"
         Width="300" Height="500"
         x:Class="UABEAvalonia.FilterAssetTypeDialog"
@@ -15,7 +16,7 @@
 		</Grid.RowDefinitions>
 		<ListBox Grid.Row="0" Name="listBox">
 			<ListBox.ItemTemplate>
-				<DataTemplate>
+				<DataTemplate x:DataType="local:FilterAssetListItem">
 					<StackPanel Orientation="Horizontal">
             <CheckBox IsChecked="{Binding Enabled}">
               <TextBlock Text="{Binding Type}"/>

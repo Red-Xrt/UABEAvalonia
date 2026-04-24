@@ -55,18 +55,18 @@
         <DataGrid.Columns>
           <DataGridTemplateColumn Header=" ">
             <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
+              <DataTemplate x:DataType="local:AssetInfoDataGridItem">
                 <Image Source="{Binding TypeClass, Converter={StaticResource AssetTypeIconConverter}}" Width="16" Height="16" />
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
-          <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-          <DataGridTextColumn Header="Container" Binding="{Binding Container}"/>
-          <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-          <DataGridTextColumn Header="File ID" Binding="{Binding FileID}"/>
-          <DataGridTextColumn Header="Path ID" Binding="{Binding PathID}"/>
-          <DataGridTextColumn Header="Size" Binding="{Binding Size}"/>
-          <DataGridTextColumn Header="Modified" Binding="{Binding Modified}"/>
+          <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="Container" Binding="{Binding Container, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="Type" Binding="{Binding Type, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="File ID" Binding="{Binding FileID, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="Path ID" Binding="{Binding PathID, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="Size" Binding="{Binding Size, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="Modified" Binding="{Binding Modified, DataType=local:AssetInfoDataGridItem}"/>
         </DataGrid.Columns>
       </DataGrid>
     </Border>
