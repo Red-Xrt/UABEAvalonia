@@ -66,8 +66,22 @@ namespace UABEAvalonia
             openInfoWindows = new List<InfoWindow>();
 
             AddHandler(DragDrop.DropEvent, Drop);
+            AddHandler(DragDrop.DragOverEvent, OnDragOver);
 
             ThemeHandler.UseDarkTheme = ConfigurationManager.Settings.UseDarkTheme;
+        }
+
+        private void OnDragOver(object? sender, DragEventArgs e)
+        {
+            if (e.DataTransfer.Contains(DataFormat.File))
+            {
+                e.DragEffects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.DragEffects = DragDropEffects.None;
+            }
+            e.Handled = true;
         }
 
         private async void MainWindow_Initialized(object? sender, EventArgs e)
@@ -180,12 +194,18 @@ namespace UABEAvalonia
 
         void Drop(object? sender, DragEventArgs e)
         {
-            string[] files = e.Data.GetFileNames().ToArray();
+            if (e.DataTransfer.Contains(DataFormat.File))
+            {
+                var filesList = e.DataTransfer.TryGetFiles();
+                if (filesList == null) return;
 
-            if (files == null || files.Length == 0)
-                return;
+                var files = filesList.Select(f => f.Path.LocalPath ?? "").Where(f => f != "").ToArray();
 
-            OpenFiles(files);
+                if (files == null || files.Length == 0)
+                    return;
+
+                OpenFiles(files);
+            }
         }
 
         private async void MenuOpen_Click(object? sender, RoutedEventArgs e)
