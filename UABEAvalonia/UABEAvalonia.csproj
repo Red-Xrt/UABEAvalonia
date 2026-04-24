@@ -27,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Styles\**" />
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Remove="Grammars\package.json" />
