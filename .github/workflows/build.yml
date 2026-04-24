@@ -35,5 +35,10 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore UABEAvalonia.sln
 
-    - name: Build
+    - name: Build (Windows)
+      if: matrix.os == 'windows-latest'
+      run: msbuild UABEAvalonia.sln /p:Configuration=Release
+
+    - name: Build (Linux)
+      if: matrix.os == 'ubuntu-latest'
       run: dotnet build UABEAvalonia.sln --configuration Release --no-restore
