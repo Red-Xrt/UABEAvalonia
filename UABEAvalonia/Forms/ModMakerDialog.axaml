@@ -51,10 +51,10 @@
         <Label Grid.Row="2">Changes</Label>
         <TreeView Grid.Row="3" Grid.ColumnSpan="2" Name="treeView">
           <TreeView.DataTemplates>
-            <TreeDataTemplate DataType="ua:ModMakerTreeFileInfo" ItemsSource="{Binding Replacers}">
+            <TreeDataTemplate DataType="ua:ModMakerTreeFileInfo" x:DataType="ua:ModMakerTreeFileInfo" ItemsSource="{Binding Replacers}">
               <TextBlock Text="{Binding DisplayText}" />
             </TreeDataTemplate>
-            <TreeDataTemplate DataType="ua:ModMakerTreeReplacerInfo">
+            <TreeDataTemplate DataType="ua:ModMakerTreeReplacerInfo" x:DataType="ua:ModMakerTreeReplacerInfo">
               <TextBlock Text="{Binding DisplayText}" />
             </TreeDataTemplate>
           </TreeView.DataTemplates>

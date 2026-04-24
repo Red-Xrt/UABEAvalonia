@@ -25,8 +25,8 @@
       <Label Grid.Row="0">Changes (double click to select)</Label>
       <TreeView Grid.Row="1" Grid.ColumnSpan="2" Name="treeView">
         <TreeView.DataTemplates>
-          <TreeDataTemplate DataType="ua:LoadModPackageTreeFileInfo">
-            <TextBlock Text="{Binding DisplayText, DataType=ua:LoadModPackageTreeFileInfo}" />
+          <TreeDataTemplate DataType="ua:LoadModPackageTreeFileInfo" x:DataType="ua:LoadModPackageTreeFileInfo">
+            <TextBlock Text="{Binding DisplayText}" />
           </TreeDataTemplate>
         </TreeView.DataTemplates>
       </TreeView>

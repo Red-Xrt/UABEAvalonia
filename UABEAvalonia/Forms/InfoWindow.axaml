@@ -60,13 +60,13 @@
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
-          <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=local:AssetInfoDataGridItem}"/>
-          <DataGridTextColumn Header="Container" Binding="{Binding Container, DataType=local:AssetInfoDataGridItem}"/>
-          <DataGridTextColumn Header="Type" Binding="{Binding Type, DataType=local:AssetInfoDataGridItem}"/>
-          <DataGridTextColumn Header="File ID" Binding="{Binding FileID, DataType=local:AssetInfoDataGridItem}"/>
-          <DataGridTextColumn Header="Path ID" Binding="{Binding PathID, DataType=local:AssetInfoDataGridItem}"/>
-          <DataGridTextColumn Header="Size" Binding="{Binding Size, DataType=local:AssetInfoDataGridItem}"/>
-          <DataGridTextColumn Header="Modified" Binding="{Binding Modified, DataType=local:AssetInfoDataGridItem}"/>
+          <DataGridTextColumn Header="Name" Binding="{ReflectionBinding Name}"/>
+          <DataGridTextColumn Header="Container" Binding="{ReflectionBinding Container}"/>
+          <DataGridTextColumn Header="Type" Binding="{ReflectionBinding Type}"/>
+          <DataGridTextColumn Header="File ID" Binding="{ReflectionBinding FileID}"/>
+          <DataGridTextColumn Header="Path ID" Binding="{ReflectionBinding PathID}"/>
+          <DataGridTextColumn Header="Size" Binding="{ReflectionBinding Size}"/>
+          <DataGridTextColumn Header="Modified" Binding="{ReflectionBinding Modified}"/>
         </DataGrid.Columns>
       </DataGrid>
     </Border>
