@@ -23,9 +23,9 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup MSBuild (Windows only)
+    - name: Setup MSVC (Windows only)
       if: matrix.os == 'windows-latest'
-      uses: microsoft/setup-msbuild@v2
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -35,10 +35,5 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore UABEAvalonia.sln
 
-    - name: Build (Windows)
-      if: matrix.os == 'windows-latest'
-      run: msbuild UABEAvalonia.sln /p:Configuration=Release
-
-    - name: Build (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Build
       run: dotnet build UABEAvalonia.sln --configuration Release --no-restore
