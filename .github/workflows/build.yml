@@ -36,4 +36,4 @@ jobs:
       run: dotnet restore UABEAvalonia.sln
 
     - name: Build
-      run: dotnet build UABEAvalonia.sln --configuration Release --no-restore
+      run: dotnet build UABEAvalonia.sln --configuration Release --no-restore /p:BuildTexToolWrap=false

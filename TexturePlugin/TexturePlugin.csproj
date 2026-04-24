@@ -78,11 +78,11 @@
     </PropertyGroup>
     
     <!-- build textoolwrap for windows with vcxproj -->
-    <MSBuild Condition="'$(UABEANativeConfig)' == 'win-x64'" Projects="$(SolutionDir)TexToolWrap\TexToolWrap.vcxproj" Targets="Build" Properties="Configuration=Release;Platform=x64" />
-    <MSBuild Condition="'$(UABEANativeConfig)' == 'win-x86'" Projects="$(SolutionDir)TexToolWrap\TexToolWrap.vcxproj" Targets="Build" Properties="Configuration=Release;Platform=Win32" />
+    <MSBuild Condition="'$(UABEANativeConfig)' == 'win-x64' AND '$(BuildTexToolWrap)' != 'false'" Projects="$(SolutionDir)TexToolWrap\TexToolWrap.vcxproj" Targets="Build" Properties="Configuration=Release;Platform=x64" />
+    <MSBuild Condition="'$(UABEANativeConfig)' == 'win-x86' AND '$(BuildTexToolWrap)' != 'false'" Projects="$(SolutionDir)TexToolWrap\TexToolWrap.vcxproj" Targets="Build" Properties="Configuration=Release;Platform=Win32" />
 
     <!-- build textoolwrap for linux with make -->
-    <Exec Condition="'$(UABEANativeConfig)' == 'linux-x64' OR '$(UABEANativeConfig)' == 'linux-x86'" Command="make" WorkingDirectory="$(SolutionDir)TexToolWrap" />
+    <Exec Condition="('$(UABEANativeConfig)' == 'linux-x64' OR '$(UABEANativeConfig)' == 'linux-x86') AND '$(BuildTexToolWrap)' != 'false'" Command="make" WorkingDirectory="$(SolutionDir)TexToolWrap" />
     
     <Message Importance="High" Text="TEXTUREPLUGIN BUILD INFO" />
     <Message Importance="High" Text="  ONWINDOWS: $([MSBuild]::IsOsPlatform(Windows))" />
