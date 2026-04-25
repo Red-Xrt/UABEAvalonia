@@ -12,6 +12,10 @@ namespace UABEAvalonia
         {
             var services = new ServiceCollection();
 
+            // Register Services
+            services.AddSingleton<UABEAvalonia.Services.IDialogService, UABEAvalonia.Services.AvaloniaDialogService>();
+            services.AddSingleton<UABEAvalonia.Services.IBundleService, UABEAvalonia.Services.BundleService>();
+
             // Register ViewModels
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<InfoWindowViewModel>();

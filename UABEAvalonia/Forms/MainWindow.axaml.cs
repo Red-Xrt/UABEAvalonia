@@ -26,25 +26,59 @@ namespace UABEAvalonia
         private bool changesUnsaved; // sets false after saving
         private bool changesMade; // stays true even after saving
         private bool ignoreCloseEvent;
-        private List<InfoWindow> openInfoWindows;
+        public List<InfoWindow> openInfoWindows;
 
         //public ObservableCollection<ComboBoxItem> comboItems;
 
         public MainWindow()
         {
             // Set DataContext from DI
-            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.MainWindowViewModel));
+            var viewModel = (UABEAvalonia.ViewModels.MainWindowViewModel)AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.MainWindowViewModel))!;
+            DataContext = viewModel;
 
-            // has to happen BEFORE initcomponent
-            Workspace = new BundleWorkspace();
+            // Re-hook up window management logic to viewmodel actions.
+            viewModel.RequestOpenInfoWindowAction = (am, fileInstances, fromBundle) =>
+            {
+                if (openInfoWindows.Count > 0)
+                {
+                    InfoWindow existingInfo = openInfoWindows[0];
+                    existingInfo.LoadData(am, fileInstances, fromBundle);
+                    existingInfo.Show();
+                    existingInfo.Activate();
+                }
+                else
+                {
+                    InfoWindow info = new InfoWindow(am, fileInstances, fromBundle);
+                    info.Closing += (sender, _) =>
+                    {
+                        if (sender == null)
+                            return;
+                        InfoWindow window = (InfoWindow)sender;
+                        openInfoWindows.Remove(window);
+                    };
+                    info.Show();
+                    openInfoWindows.Add(info);
+                }
+            };
 
+            viewModel.RequestCloseAllInfoWindowsAction = async () =>
+            {
+                List<InfoWindow> openInfoWindowsCopy = new List<InfoWindow>(openInfoWindows);
+                foreach (InfoWindow window in openInfoWindowsCopy)
+                {
+                    await window.AskForSaveAndClose();
+                }
+            };
+
+            // Link existing Workspace to ViewModel's service to preserve legacy action support during transition
+            Workspace = ((UABEAvalonia.Services.IBundleService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IBundleService))!).Workspace;
 
             InitializeComponent();
 #if DEBUG
             this.AttachDevTools();
 #endif
             //generated events
-            menuOpen.Click += MenuOpen_Click;
+            // menuOpen.Click += MenuOpen_Click; // Replaced by MVVM Command
             menuLoadPackageFile.Click += MenuLoadPackageFile_Click;
             menuClose.Click += MenuClose_Click;
             menuSave.Click += MenuSave_Click;
@@ -54,13 +88,13 @@ namespace UABEAvalonia
             menuToggleDarkTheme.Click += MenuToggleDarkTheme_Click;
             menuToggleCpp2Il.Click += MenuToggleCpp2Il_Click;
             menuAbout.Click += MenuAbout_Click;
-            btnExport.Click += BtnExport_Click;
-            btnImport.Click += BtnImport_Click;
-            btnRemove.Click += BtnRemove_Click;
-            btnInfo.Click += BtnInfo_Click;
-            btnExportAll.Click += BtnExportAll_Click;
-            btnImportAll.Click += BtnImportAll_Click;
-            btnRename.Click += BtnRename_Click;
+            // btnExport.Click += BtnExport_Click;
+            // btnImport.Click += BtnImport_Click;
+            // btnRemove.Click += BtnRemove_Click;
+            // btnInfo.Click += BtnInfo_Click;
+            // btnExportAll.Click += BtnExportAll_Click;
+            // btnImportAll.Click += BtnImportAll_Click;
+            // btnRename.Click += BtnRename_Click;
             Closing += MainWindow_Closing;
 
             changesUnsaved = false;
@@ -212,24 +246,6 @@ namespace UABEAvalonia
             }
         }
 
-        private async void MenuOpen_Click(object? sender, RoutedEventArgs e)
-        {
-            var selectedFiles = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
-            {
-                Title = "Open assets or bundle file",
-                FileTypeFilter = new List<FilePickerFileType>()
-                {
-                    new FilePickerFileType("All files") { Patterns = new List<string>() { "*" } }
-                },
-                AllowMultiple = true
-            });
-
-            string[] selectedFilePaths = FileDialogUtils.GetOpenFileDialogFiles(selectedFiles);
-            if (selectedFilePaths.Length == 0)
-                return;
-
-            OpenFiles(selectedFilePaths);
-        }
 
         private async void MenuLoadPackageFile_Click(object? sender, RoutedEventArgs e)
         {
@@ -561,6 +577,9 @@ namespace UABEAvalonia
 
         private async void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
+            var bundleService = (UABEAvalonia.Services.IBundleService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IBundleService))!;
+            changesUnsaved = bundleService.ChangesUnsaved;
+
             if (!changesUnsaved || ignoreCloseEvent)
             {
                 e.Cancel = false;
