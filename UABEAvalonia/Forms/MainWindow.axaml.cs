@@ -34,7 +34,7 @@ namespace UABEAvalonia
         {
             // has to happen BEFORE initcomponent
             Workspace = new BundleWorkspace();
-            Initialized += MainWindow_Initialized;
+
 
             InitializeComponent();
 #if DEBUG
@@ -84,8 +84,9 @@ namespace UABEAvalonia
             e.Handled = true;
         }
 
-        private async void MainWindow_Initialized(object? sender, EventArgs e)
+        protected override async void OnOpened(EventArgs e)
         {
+            base.OnOpened(e);
             string classDataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "classdata.tpk");
             if (File.Exists(classDataPath))
             {
