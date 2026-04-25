@@ -190,6 +190,13 @@ namespace UABEAvalonia
         private async Task<bool> LoadOrAskTypeData(AssetsFileInstance fileInst)
         {
             string uVer = fileInst.file.Metadata.UnityVersion;
+
+            if (am.ClassPackage == null)
+            {
+                await MessageBoxUtil.ShowDialog(this, "Error", "classdata.tpk is not loaded. Cannot load class database.");
+                return false;
+            }
+
             am.LoadClassDatabaseFromPackage(uVer);
             //if (am.LoadClassDatabaseFromPackage(uVer) == null)
             //{

@@ -637,6 +637,12 @@ namespace UABEAvalonia
                 }
             }
 
+            if (am.ClassPackage == null)
+            {
+                await MessageBoxUtil.ShowDialog(this, "Error", "classdata.tpk is not loaded. Cannot load class database.");
+                return false;
+            }
+
             am.LoadClassDatabaseFromPackage(uVer);
             return true;
         }
