@@ -32,6 +32,9 @@ namespace UABEAvalonia
 
         public MainWindow()
         {
+            // Set DataContext from DI
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.MainWindowViewModel));
+
             // has to happen BEFORE initcomponent
             Workspace = new BundleWorkspace();
 

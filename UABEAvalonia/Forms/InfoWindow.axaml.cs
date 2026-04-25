@@ -49,6 +49,9 @@ namespace UABEAvalonia
         //for preview
         public InfoWindow()
         {
+            // Set DataContext from DI
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.InfoWindowViewModel));
+
             InitializeComponent();
 #if DEBUG
             this.AttachDevTools();
