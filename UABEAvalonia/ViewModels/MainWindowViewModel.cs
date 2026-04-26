@@ -562,7 +562,7 @@ namespace UABEAvalonia.ViewModels
 
                     System.Threading.Thread thread = new System.Threading.Thread(() =>
                     {
-                         _bundleService.CompressBundle(_bundleService.Workspace.BundleInst, selectedFilePath, compType).Wait();
+                         _bundleService.CompressBundle(_bundleService.Workspace.BundleInst, selectedFilePath, compType, progressWindow.Progress).Wait();
                     });
                     thread.Start();
 

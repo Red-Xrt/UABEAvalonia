@@ -96,14 +96,14 @@ namespace UABEAvalonia.Services
             ResetWorkspace(bundleInst);
         }
 
-        public Task CompressBundle(BundleFileInstance bundleInst, string path, AssetBundleCompressionType compType)
+        public Task CompressBundle(BundleFileInstance bundleInst, string path, AssetBundleCompressionType compType, AssetsTools.NET.IAssetBundleCompressProgress progress = null)
         {
             return Task.Run(() =>
             {
                 using (FileStream fs = File.Open(path, FileMode.Create))
                 using (AssetsFileWriter w = new AssetsFileWriter(fs))
                 {
-                    bundleInst.file.Pack(w, compType, true, null); // Provide proper progress implementation if needed
+                    bundleInst.file.Pack(w, compType, true, progress);
                 }
             });
         }

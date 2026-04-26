@@ -15,6 +15,7 @@ namespace UABEAvalonia
             // Register Services
             services.AddSingleton<UABEAvalonia.Services.IDialogService, UABEAvalonia.Services.AvaloniaDialogService>();
             services.AddSingleton<UABEAvalonia.Services.IBundleService, UABEAvalonia.Services.BundleService>();
+            services.AddSingleton<UABEAvalonia.Services.IWindowService, UABEAvalonia.Services.AvaloniaWindowService>();
 
             // Register ViewModels
             services.AddTransient<MainWindowViewModel>();

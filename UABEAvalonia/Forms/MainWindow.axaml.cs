@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using UABEAvalonia.ViewModels;
 
 namespace UABEAvalonia
@@ -56,14 +58,14 @@ namespace UABEAvalonia
             {
                 e.Cancel = true;
 
-                var result = await dialogService.ShowMessageBox("Changes made", "You've modified this file. Would you like to save?", MessageBoxType.YesNoCancel);
+                var result = await dialogService.ShowMessageBox("Changes made", "You've modified this file. Would you like to save?", UABEAvalonia.MessageBoxType.YesNoCancel);
 
-                if (result == MessageBoxResult.Cancel)
+                if (result == UABEAvalonia.MessageBoxResult.Cancel)
                 {
                     return; // Abort close
                 }
 
-                if (result == MessageBoxResult.Yes)
+                if (result == UABEAvalonia.MessageBoxResult.Yes)
                 {
                     if (viewModel.SaveCommand != null && viewModel.SaveCommand.CanExecute(null))
                     {

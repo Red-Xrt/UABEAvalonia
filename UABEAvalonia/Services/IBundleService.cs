@@ -24,7 +24,7 @@ namespace UABEAvalonia.Services
 
         void SaveBundle(BundleFileInstance bundleInst, string path);
         void SaveBundleOver(BundleFileInstance bundleInst);
-        Task CompressBundle(BundleFileInstance bundleInst, string path, AssetBundleCompressionType compType);
+        Task CompressBundle(BundleFileInstance bundleInst, string path, AssetBundleCompressionType compType, AssetsTools.NET.IAssetBundleCompressProgress progress = null);
 
         void DecompressToFile(BundleFileInstance bundleInst, string savePath);
         void DecompressToMemory(BundleFileInstance bundleInst);
