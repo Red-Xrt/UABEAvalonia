@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UABEAvalonia.Services;
 using AssetsTools.NET.Extra;
 using System.Collections.Generic;
-using UABEAvalonia.Logic;
 
 namespace UABEAvalonia.ViewModels
 {
@@ -32,13 +31,13 @@ namespace UABEAvalonia.ViewModels
         [ObservableProperty]
         private bool hasAssets;
 
-        public System.Action<AssetsTools.NET.Extra.AssetsManager, List<AssetsTools.NET.Extra.AssetsFileInstance>, bool>? RequestOpenInfoWindowAction { get; set; }
-        public System.Func<Task>? RequestCloseAllInfoWindowsAction { get; set; }
+        private readonly IWindowService _windowService;
 
-        public MainWindowViewModel(IDialogService dialogService, IBundleService bundleService)
+        public MainWindowViewModel(IDialogService dialogService, IBundleService bundleService, IWindowService windowService)
         {
             _dialogService = dialogService;
             _bundleService = bundleService;
+            _windowService = windowService;
         }
 
         [RelayCommand]
@@ -59,10 +58,7 @@ namespace UABEAvalonia.ViewModels
 
             DetectedFileType fileType = _bundleService.DetectFileType(selectedFile);
 
-            if (RequestCloseAllInfoWindowsAction != null)
-            {
-                await RequestCloseAllInfoWindowsAction();
-            }
+            await _windowService.CloseAllInfoWindows();
 
             _bundleService.ResetWorkspace(null); // Unload all first
             _bundleService.AssetsManager.UnloadAllAssetsFiles(true);
@@ -135,7 +131,7 @@ namespace UABEAvalonia.ViewModels
                     }
                 }
 
-                RequestOpenInfoWindowAction?.Invoke(_bundleService.AssetsManager, fileInstances, false);
+                _windowService.OpenInfoWindow(_bundleService.AssetsManager, fileInstances, false);
             }
             else if (fileType == DetectedFileType.BundleFile)
             {
@@ -210,7 +206,7 @@ namespace UABEAvalonia.ViewModels
                 if (!await _bundleService.LoadOrAskTypeData(fileInst, "0.0.0"))
                     return;
 
-                RequestOpenInfoWindowAction?.Invoke(_bundleService.AssetsManager, new List<AssetsFileInstance> { fileInst }, true);
+                _windowService.OpenInfoWindow(_bundleService.AssetsManager, new List<AssetsFileInstance> { fileInst }, true);
             }
             else
             {
@@ -350,7 +346,7 @@ namespace UABEAvalonia.ViewModels
             if (_bundleService.Workspace.BundleInst == null || SelectedFile == null) return;
 
             string newName = await _dialogService.AskForRename(SelectedFile.Name);
-            if (newName == string.Empty) return;
+            if (newName == null || string.IsNullOrEmpty(newName) || newName == SelectedFile.Name) return;
 
             _bundleService.RenameFile(SelectedFile.Name, newName);
 
@@ -359,6 +355,224 @@ namespace UABEAvalonia.ViewModels
             Files.Clear();
             foreach (var item in _bundleService.Workspace.Files) Files.Add(item);
             SelectedFile = currentFile;
+        }
+
+
+        [RelayCommand]
+        public async Task LoadPackageFileAsync()
+        {
+            var selectedFilePaths = await _dialogService.OpenFileDialog("Open Package", false, new List<string> { "*.emip" });
+            if (selectedFilePaths.Length == 0) return;
+
+            string emipPath = selectedFilePaths[0];
+
+            if (!string.IsNullOrEmpty(emipPath))
+            {
+                AssetsTools.NET.AssetsFileReader r = new AssetsTools.NET.AssetsFileReader(System.IO.File.OpenRead(emipPath));
+                UABEAvalonia.Logic.InstallerPackageFile emip = new UABEAvalonia.Logic.InstallerPackageFile();
+                emip.Read(r);
+
+                await _windowService.OpenLoadModPackageWindow(emip, _bundleService.AssetsManager);
+            }
+        }
+
+        [RelayCommand]
+        public async Task CloseAsync()
+        {
+            await AskForSave();
+            await CloseAllFiles();
+        }
+
+        [RelayCommand]
+        public async Task SaveAsync()
+        {
+            await AskForLocationAndSave(false);
+        }
+
+        [RelayCommand]
+        public async Task SaveAsAsync()
+        {
+            await AskForLocationAndSave(true);
+        }
+
+        [RelayCommand]
+        public async Task CompressAsync()
+        {
+            await AskForLocationAndCompress();
+        }
+
+        [RelayCommand]
+        public void Exit()
+        {
+            System.Environment.Exit(0);
+        }
+
+        [RelayCommand]
+        public void ToggleDarkTheme()
+        {
+            UABEAvalonia.ConfigurationManager.Settings.UseDarkTheme = !UABEAvalonia.ConfigurationManager.Settings.UseDarkTheme;
+            ThemeHandler.UseDarkTheme = UABEAvalonia.ConfigurationManager.Settings.UseDarkTheme;
+        }
+
+        [RelayCommand]
+        public async Task ToggleCpp2IlAsync()
+        {
+            bool useCpp2Il = !UABEAvalonia.ConfigurationManager.Settings.UseCpp2Il;
+            UABEAvalonia.ConfigurationManager.Settings.UseCpp2Il = useCpp2Il;
+
+            await _dialogService.ShowMessageBox("Note", $"Use Cpp2Il is set to: {useCpp2Il.ToString().ToLower()}");
+        }
+
+        [RelayCommand]
+        public async Task AboutAsync()
+        {
+            await _windowService.OpenAboutWindow();
+        }
+
+        private async Task CloseAllFiles()
+        {
+            await _windowService.CloseAllInfoWindows();
+
+            _bundleService.ChangesUnsaved = false;
+            _bundleService.ChangesMade = false;
+
+            _bundleService.AssetsManager.UnloadAllAssetsFiles(true);
+            _bundleService.AssetsManager.UnloadAllBundleFiles();
+
+            IsWorkspaceActive = false;
+            HasAssets = false;
+
+            _bundleService.ResetWorkspace(null);
+
+            FileName = "No file opened.";
+            Files.Clear();
+        }
+
+        public async Task AskForSave()
+        {
+            if (_bundleService.ChangesUnsaved && _bundleService.Workspace.BundleInst != null)
+            {
+                var choice = await _dialogService.ShowMessageBox("Changes made", "You've modified this file. Would you like to save?", MessageBoxType.YesNo);
+                if (choice == MessageBoxResult.Yes)
+                {
+                    await AskForLocationAndSave(true);
+                }
+            }
+        }
+
+        private async Task AskForLocationAndSave(bool saveAs)
+        {
+            if (_bundleService.ChangesUnsaved && _bundleService.Workspace.BundleInst != null)
+            {
+                if (saveAs)
+                {
+                    var selectedFilePath = await _dialogService.SaveFileDialog("Save as...", "", new List<string>());
+                    if (selectedFilePath == null)
+                        return;
+
+                    if (System.IO.Path.GetFullPath(selectedFilePath) == System.IO.Path.GetFullPath(_bundleService.Workspace.BundleInst.path))
+                    {
+                        await _dialogService.ShowMessageBox("File in use", "Please use File > Save to save over the currently open bundle.");
+                        return;
+                    }
+
+                    try
+                    {
+                        _bundleService.SaveBundle(_bundleService.Workspace.BundleInst, selectedFilePath);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        await _dialogService.ShowMessageBox("Write exception", "There was a problem while writing the file:\n" + ex.ToString());
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        _bundleService.SaveBundleOver(_bundleService.Workspace.BundleInst);
+
+                        var currentFile = SelectedFile;
+                        Files.Clear();
+                        foreach (var item in _bundleService.Workspace.Files) Files.Add(item);
+
+                        if (currentFile != null)
+                        {
+                            foreach (var f in Files) if (f.Name == currentFile.Name) SelectedFile = f;
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        await _dialogService.ShowMessageBox("Write exception", "There was a problem while writing the file:\n" + ex.ToString());
+                    }
+                }
+            }
+        }
+
+        private async Task AskForLocationAndCompress()
+        {
+            if (_bundleService.Workspace.BundleInst != null)
+            {
+                if (_bundleService.ChangesMade)
+                {
+                    string messageBoxTest;
+                    if (_bundleService.ChangesUnsaved)
+                    {
+                        messageBoxTest =
+                            "You've modified this file, but you still haven't saved this bundle file to disk yet. If you want \n" +
+                            "to compress the file with changes, please save this bundle now and open that file instead. \n" +
+                            "Click Ok to compress the file without changes.";
+                    }
+                    else
+                    {
+                        messageBoxTest =
+                            "You've modified this file, but only the old file before you made changes is open. If you want to compress the file with \n" +
+                            "changes, please close this bundle and open the file you saved. Click Ok to compress the file without changes.";
+                    }
+
+                    var continueWithChanges = await _dialogService.ShowMessageBox("Note", messageBoxTest, MessageBoxType.OKCancel);
+
+                    if (continueWithChanges == MessageBoxResult.Cancel)
+                    {
+                        return;
+                    }
+                }
+
+                var selectedFilePath = await _dialogService.SaveFileDialog("Save as...", "", new List<string>());
+                if (selectedFilePath == null)
+                    return;
+
+                if (System.IO.Path.GetFullPath(selectedFilePath) == System.IO.Path.GetFullPath(_bundleService.Workspace.BundleInst.path))
+                {
+                    await _dialogService.ShowMessageBox("File in use", "Since this file is already open in UABEA, you must pick a new file name (sorry!)");
+                    return;
+                }
+
+                string result = await _dialogService.ShowCustomMessageBox("Note", "What compression method do you want to use?\nLZ4: Faster but larger size\nLZMA: Slower but smaller size", "LZ4", "LZMA", "Cancel");
+
+                AssetsTools.NET.AssetBundleCompressionType compType = result switch
+                {
+                    "LZ4" => AssetsTools.NET.AssetBundleCompressionType.LZ4,
+                    "LZMA" => AssetsTools.NET.AssetBundleCompressionType.LZMA,
+                    _ => AssetsTools.NET.AssetBundleCompressionType.None
+                };
+
+                if (compType != AssetsTools.NET.AssetBundleCompressionType.None)
+                {
+                    ProgressWindow progressWindow = new ProgressWindow("Compressing...");
+
+                    System.Threading.Thread thread = new System.Threading.Thread(() =>
+                    {
+                         _bundleService.CompressBundle(_bundleService.Workspace.BundleInst, selectedFilePath, compType).Wait();
+                    });
+                    thread.Start();
+
+                    await progressWindow.ShowDialog(((Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)Avalonia.Application.Current.ApplicationLifetime).MainWindow);
+                }
+            }
+            else
+            {
+                await _dialogService.ShowMessageBox("Note", "Please open a bundle file before using compress.");
+            }
         }
     }
 }

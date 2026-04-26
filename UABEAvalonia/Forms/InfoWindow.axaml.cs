@@ -511,7 +511,8 @@ namespace UABEAvalonia
 
         private async Task AskForSave()
         {
-            MessageBoxResult choice = await MessageBoxUtil.ShowDialog(this,
+            var dialogService = (UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService));
+            MessageBoxResult choice = await dialogService.ShowMessageBox(
                 "Changes made", "You've modified this file. Would you like to save?",
                 MessageBoxType.YesNo);
             if (choice == MessageBoxResult.Yes)
@@ -567,7 +568,7 @@ namespace UABEAvalonia
                     }
                 }
 
-                await MessageBoxUtil.ShowDialog(this, "Success", "File saved. To complete changes, exit this window and File->Save in bundle window.");
+                await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Success", "File saved. To complete changes, exit this window and File->Save in bundle window.");
             }
             else
             {
@@ -968,7 +969,7 @@ namespace UABEAvalonia
 
                         if (bytes == null)
                         {
-                            await MessageBoxUtil.ShowDialog(this, "Parse error", "Something went wrong when reading the dump file:\n" + exceptionMessage);
+                            await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Parse error", "Something went wrong when reading the dump file:\n" + exceptionMessage);
                             return;
                         }
 
@@ -1019,7 +1020,7 @@ namespace UABEAvalonia
 
                 if (bytes == null)
                 {
-                    await MessageBoxUtil.ShowDialog(this, "Parse error", "Something went wrong when reading the dump file:\n" + exceptionMessage);
+                    await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Parse error", "Something went wrong when reading the dump file:\n" + exceptionMessage);
                     return;
                 }
 
@@ -1033,7 +1034,7 @@ namespace UABEAvalonia
             AssetTypeValueField baseField = cont.BaseValueField;
             if (baseField == null)
             {
-                await MessageBoxUtil.ShowDialog(this, "Error", "Something went wrong deserializing this asset.");
+                await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Error", "Something went wrong deserializing this asset.");
                 return false;
             }
 
@@ -1089,7 +1090,7 @@ namespace UABEAvalonia
 
             if (!foundResult)
             {
-                await MessageBoxUtil.ShowDialog(this, "Search end", "Can't find any assets that match.");
+                await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Search end", "Can't find any assets that match.");
 
                 searchText = "";
                 searchStart = 0;
@@ -1103,7 +1104,7 @@ namespace UABEAvalonia
         {
             if (!SelectAsset(targetFile, targetPathId))
             {
-                await MessageBoxUtil.ShowDialog(this, "Search end", "Can't find any assets that match.");
+                await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Search end", "Can't find any assets that match.");
                 return;
             }
         }
@@ -1232,7 +1233,7 @@ namespace UABEAvalonia
         {
             if (dataGrid.SelectedItem == null)
             {
-                await MessageBoxUtil.ShowDialog(this, "Note", "No item selected.");
+                await ((UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))).ShowMessageBox("Note", "No item selected.");
                 return true;
             }
             return false;
