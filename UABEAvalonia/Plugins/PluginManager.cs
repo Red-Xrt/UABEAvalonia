@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace UABEAvalonia.Plugins
 {
-    public class PluginManager
+    public class PluginManager : UABEAvalonia.Services.IPluginService
     {
         private List<PluginInfo> loadedPlugins;
 

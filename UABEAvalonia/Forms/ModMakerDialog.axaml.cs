@@ -32,6 +32,7 @@ namespace UABEAvalonia
         public ModMakerDialog()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.ModMakerDialogViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

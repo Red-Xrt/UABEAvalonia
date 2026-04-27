@@ -22,6 +22,7 @@ namespace UABEAvalonia
         public GameObjectViewWindow()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.GameObjectViewWindowViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

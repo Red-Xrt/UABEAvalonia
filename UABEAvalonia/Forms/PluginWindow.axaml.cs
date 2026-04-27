@@ -19,6 +19,7 @@ namespace UABEAvalonia
         public PluginWindow()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.PluginWindowViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

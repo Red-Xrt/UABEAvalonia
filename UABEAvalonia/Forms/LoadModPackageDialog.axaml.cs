@@ -28,6 +28,7 @@ namespace UABEAvalonia
         public LoadModPackageDialog()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.LoadModPackageDialogViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

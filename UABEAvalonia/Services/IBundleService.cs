@@ -17,8 +17,8 @@ namespace UABEAvalonia.Services
         DetectedFileType DetectFileType(string filePath);
 
         Task<bool> LoadOrAskTypeData(AssetsFileInstance fileInst, string uVer);
-        BundleFileInstance LoadBundleFile(string selectedFile);
-        AssetsFileInstance LoadAssetsFile(string selectedFile);
+        Task<BundleFileInstance> LoadBundleFile(string selectedFile);
+        Task<AssetsFileInstance> LoadAssetsFile(string selectedFile);
 
         void ResetWorkspace(BundleFileInstance? bundleInst);
 

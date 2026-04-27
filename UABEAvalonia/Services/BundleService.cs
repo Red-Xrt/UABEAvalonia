@@ -52,14 +52,14 @@ namespace UABEAvalonia.Services
             return false;
         }
 
-        public BundleFileInstance LoadBundleFile(string selectedFile)
+        public async Task<BundleFileInstance> LoadBundleFile(string selectedFile)
         {
-            return AssetsManager.LoadBundleFile(selectedFile, false);
+            return await Task.Run(() => AssetsManager.LoadBundleFile(selectedFile, false));
         }
 
-        public AssetsFileInstance LoadAssetsFile(string selectedFile)
+        public async Task<AssetsFileInstance> LoadAssetsFile(string selectedFile)
         {
-            return AssetsManager.LoadAssetsFile(selectedFile, true);
+            return await Task.Run(() => AssetsManager.LoadAssetsFile(selectedFile, true));
         }
 
         public void ResetWorkspace(BundleFileInstance? bundleInst)

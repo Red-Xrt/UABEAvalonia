@@ -83,7 +83,7 @@ namespace UABEAvalonia.ViewModels
 
             if (fileType == DetectedFileType.AssetsFile)
             {
-                AssetsFileInstance fileInst = _bundleService.LoadAssetsFile(selectedFile);
+                AssetsFileInstance fileInst = await _bundleService.LoadAssetsFile(selectedFile);
 
                 if (!await _bundleService.LoadOrAskTypeData(fileInst, "0.0.0")) // Simple pass for now, will be updated to ask properly
                 {
@@ -124,7 +124,7 @@ namespace UABEAvalonia.ViewModels
                         {
                             try
                             {
-                                fileInstances.Add(_bundleService.LoadAssetsFile(otherSelectedFile));
+                                fileInstances.Add(await _bundleService.LoadAssetsFile(otherSelectedFile));
                             }
                             catch { }
                         }
@@ -135,7 +135,7 @@ namespace UABEAvalonia.ViewModels
             }
             else if (fileType == DetectedFileType.BundleFile)
             {
-                BundleFileInstance bundleInst = _bundleService.LoadBundleFile(selectedFile);
+                BundleFileInstance bundleInst = await _bundleService.LoadBundleFile(selectedFile);
 
                 if (AssetBundleUtil.IsBundleDataCompressed(bundleInst.file))
                 {
