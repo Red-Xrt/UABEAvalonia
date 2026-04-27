@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET.Extra;
+using AssetsTools.NET.Extra;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,21 +25,26 @@ namespace UABEAvalonia.Plugins
                 Assembly asm = Assembly.LoadFrom(path);
                 foreach (Type type in asm.GetTypes())
                 {
-                    if (typeof(UABEAPlugin).IsAssignableFrom(type))
+                    if (typeof(UABEAPlugin).IsAssignableFrom(type) && !type.IsAbstract)
                     {
                         object? typeInst = Activator.CreateInstance(type);
                         if (typeInst == null)
-                            return false;
+                            continue;
 
                         UABEAPlugin plugInst = (UABEAPlugin)typeInst;
                         PluginInfo plugInf = plugInst.Init();
-                        loadedPlugins.Add(plugInf);
-                        return true;
+
+                        if (plugInf != null)
+                        {
+                            loadedPlugins.Add(plugInf);
+                            return true;
+                        }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Failed to load plugin at {path}: {ex.Message}");
                 return false;
             }
             return false;

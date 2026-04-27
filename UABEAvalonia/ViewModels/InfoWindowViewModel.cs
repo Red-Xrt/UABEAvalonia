@@ -102,9 +102,9 @@ namespace UABEAvalonia.ViewModels
                 TypeID = cont.ClassId,
                 FileID = fileId,
                 PathID = pathId,
-                Size = size,
+                Size = (uint)size,
                 Modified = modified,
-                assetContainer = cont
+                AssetContainer = cont
             };
         }
 

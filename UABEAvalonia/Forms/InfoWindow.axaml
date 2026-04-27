@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UABEAvalonia"
+        xmlns:models="using:UABEAvalonia.Models"
         xmlns:vm="using:UABEAvalonia.ViewModels"
         x:DataType="vm:InfoWindowViewModel"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -30,24 +31,24 @@
   <Grid RowDefinitions="Auto, *, Auto">
     <Menu Grid.Row="0" Height="32" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,0,0,1">
       <MenuItem Header="_File">
-        <MenuItem Header="Add" Name="menuAdd" />
-        <MenuItem Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" Name="menuSave" />
-        <MenuItem Header="Save as..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Name="menuSaveAs" />
-        <MenuItem Header="Create Package File" Name="menuCreatePackageFile" />
-        <MenuItem Header="Close" HotKey="Ctrl+W" InputGesture="Ctrl+W" Name="menuClose" />
+        <MenuItem Header="Add" Name="menuAdd" Command="{Binding AddAssetCommand}"  />
+        <MenuItem Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" Name="menuSave" Command="{Binding SaveCommand}"  />
+        <MenuItem Header="Save as..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Name="menuSaveAs" Command="{Binding SaveAsCommand}"  />
+        <MenuItem Header="Create Package File" Name="menuCreatePackageFile" Command="{Binding CreatePackageFileCommand}"  />
+        <MenuItem Header="Close" HotKey="Ctrl+W" InputGesture="Ctrl+W" Name="menuClose" Command="{Binding CloseCommand}"  />
       </MenuItem>
       <MenuItem Header="_Search">
-        <MenuItem Header="Search by name" HotKey="Ctrl+F" InputGesture="Ctrl+F" Name="menuSearchByName" />
-        <MenuItem Header="Continue search" HotKey="F3" InputGesture="F3" Name="menuContinueSearch" />
-        <MenuItem Header="Go to asset" HotKey="Ctrl+G" InputGesture="Ctrl+G" Name="menuGoToAsset" />
+        <MenuItem Header="Search by name" HotKey="Ctrl+F" InputGesture="Ctrl+F" Name="menuSearchByName" Command="{Binding SearchCommand}"  />
+        <MenuItem Header="Continue search" HotKey="F3" InputGesture="F3" Name="menuContinueSearch" Command="{Binding ContinueSearchCommand}"  />
+        <MenuItem Header="Go to asset" HotKey="Ctrl+G" InputGesture="Ctrl+G" Name="menuGoToAsset" Command="{Binding GoToAssetCommand}"  />
       </MenuItem>
       <MenuItem Header="_View">
-        <MenuItem Header="Filter" Name="menuFilter" />
-        <MenuItem Header="Info" Name="menuInfo" />
-        <MenuItem Header="Dependencies" Name="menuDependencies" />
-        <MenuItem Header="Hierarchy" Name="menuHierarchy" />
-        <MenuItem Header="Scripts" Name="menuScripts" />
-        <MenuItem Header="Type tree" Name="menuTypeTree" />
+        <MenuItem Header="Filter" Name="menuFilter" Command="{Binding FilterCommand}"  />
+        <MenuItem Header="Info" Name="menuInfo" Command="{Binding InfoCommand}"  />
+        <MenuItem Header="Dependencies" Name="menuDependencies" Command="{Binding DependenciesCommand}"  />
+        <MenuItem Header="Hierarchy" Name="menuHierarchy" Command="{Binding HierarchyCommand}"  />
+        <MenuItem Header="Scripts" Name="menuScripts" Command="{Binding ScriptsCommand}"  />
+        <MenuItem Header="Type tree" Name="menuTypeTree" Command="{Binding TypeTreeCommand}"  />
       </MenuItem>
     </Menu>
 
@@ -65,7 +66,7 @@
           <DataGrid.Columns>
             <DataGridTemplateColumn Header="Name" Width="2*">
               <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate x:DataType="local:AssetInfoDataGridItem">
+                <DataTemplate x:DataType="models:AssetInfoDataGridItem">
                   <Grid ColumnDefinitions="Auto, *">
                     <Image Grid.Column="0" Source="{Binding TypeClass, Converter={StaticResource IconConverter}}" Width="16" Height="16" Margin="4,0" />
                     <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" />
@@ -87,17 +88,17 @@
       <Border Grid.Column="1" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" CornerRadius="4" Padding="10">
         <StackPanel Spacing="5">
           <TextBlock Text="Asset Actions" FontWeight="SemiBold" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-          <Button HorizontalAlignment="Stretch" Name="btnViewData" Content="View Data" Classes="accent"/>
-          <Button HorizontalAlignment="Stretch" Name="btnEditData" Content="Edit Data" />
-          <Button HorizontalAlignment="Stretch" Name="btnSceneView" Content="Scene View" />
+          <Button HorizontalAlignment="Stretch" Name="btnViewData" Command="{Binding ViewDataCommand}"  Content="View Data" Classes="accent"/>
+          <Button HorizontalAlignment="Stretch" Name="btnEditData" Command="{Binding EditDataCommand}"  Content="Edit Data" />
+          <Button HorizontalAlignment="Stretch" Name="btnSceneView" Command="{Binding SceneViewCommand}"  Content="Scene View" />
           <Separator Margin="0,5"/>
-          <Button HorizontalAlignment="Stretch" Name="btnExportRaw" Content="Export Raw" />
-          <Button HorizontalAlignment="Stretch" Name="btnExportDump" Content="Export Dump" />
-          <Button HorizontalAlignment="Stretch" Name="btnPlugin" Content="Plugins" />
+          <Button HorizontalAlignment="Stretch" Name="btnExportRaw" Command="{Binding ExportRawCommand}"  Content="Export Raw" />
+          <Button HorizontalAlignment="Stretch" Name="btnExportDump" Command="{Binding ExportDumpCommand}"  Content="Export Dump" />
+          <Button HorizontalAlignment="Stretch" Name="btnPlugin" Command="{Binding PluginCommand}"  Content="Plugins" />
           <Separator Margin="0,5"/>
-          <Button HorizontalAlignment="Stretch" Name="btnImportRaw" Content="Import Raw" />
-          <Button HorizontalAlignment="Stretch" Name="btnImportDump" Content="Import Dump" />
-          <Button HorizontalAlignment="Stretch" Name="btnRemove" Content="Remove" Foreground="#D32F2F" />
+          <Button HorizontalAlignment="Stretch" Name="btnImportRaw" Command="{Binding ImportRawCommand}"  Content="Import Raw" />
+          <Button HorizontalAlignment="Stretch" Name="btnImportDump" Command="{Binding ImportDumpCommand}"  Content="Import Dump" />
+          <Button HorizontalAlignment="Stretch" Name="btnRemove" Command="{Binding RemoveCommand}"  Content="Remove" Foreground="#D32F2F" />
         </StackPanel>
       </Border>
     </Grid>
