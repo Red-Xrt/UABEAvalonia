@@ -1,0 +1,6 @@
+1. Complete pre commit steps
+   - Fix Missing DI registration for `IWindowService` in `AppServices.cs`.
+   - Fix `CompressAsync` hang by passing progress callback.
+   - Re-implement Drag and Drop in `MainWindow.axaml.cs`.
+   - Fix `InfoWindow.axaml.cs` constructor DI wiring and `ItemsSource` binding conflict.
+2. Submit the change.

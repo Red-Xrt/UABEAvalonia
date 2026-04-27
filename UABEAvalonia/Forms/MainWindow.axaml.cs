@@ -10,7 +10,6 @@ namespace UABEAvalonia
 {
     public partial class MainWindow : Window
     {
-        // Keep a reference if any legacy external plugins attempt to reach in, otherwise ViewModel holds the state
         public BundleWorkspace Workspace { get; private set; }
 
         public MainWindow()
