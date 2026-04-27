@@ -7,15 +7,18 @@ namespace UABEAvalonia.Services
 {
     public class BundleService : IBundleService
     {
+        private readonly ICompressionService _compressionService;
+
         public BundleWorkspace Workspace { get; private set; }
         public AssetsManager AssetsManager => Workspace.am;
 
         public bool ChangesMade { get; set; }
         public bool ChangesUnsaved { get; set; }
 
-        public BundleService()
+        public BundleService(ICompressionService compressionService)
         {
             Workspace = new BundleWorkspace();
+            _compressionService = compressionService;
         }
 
         public void LoadClassPackage(string classDataPath)
@@ -96,48 +99,27 @@ namespace UABEAvalonia.Services
             ResetWorkspace(bundleInst);
         }
 
-        public Task CompressBundle(BundleFileInstance bundleInst, string path, AssetBundleCompressionType compType, AssetsTools.NET.IAssetBundleCompressProgress progress = null)
+        public Task CompressBundle(BundleFileInstance bundleInst, string path, AssetBundleCompressionType compType, AssetsTools.NET.IAssetBundleCompressProgress progress = null!)
         {
-            return Task.Run(() =>
-            {
-                using (FileStream fs = File.Open(path, FileMode.Create))
-                using (AssetsFileWriter w = new AssetsFileWriter(fs))
-                {
-                    bundleInst.file.Pack(w, compType, true, progress);
-                }
-            });
+            return _compressionService.CompressBundleAsync(bundleInst.file, path, compType, progress);
         }
 
-        public void DecompressToFile(BundleFileInstance bundleInst, string savePath)
+        public async void DecompressToFile(BundleFileInstance bundleInst, string savePath)
         {
-            AssetBundleFile bundle = bundleInst.file;
+            await _compressionService.DecompressBundleAsync(bundleInst.file, savePath);
 
-            using (FileStream bundleStream = File.Open(savePath, FileMode.Create))
-            {
-                bundle.Unpack(new AssetsFileWriter(bundleStream));
-                bundleStream.Position = 0;
-
-                AssetBundleFile newBundle = new AssetBundleFile();
-                newBundle.Read(new AssetsFileReader(bundleStream));
-
-                bundle.Close();
-                bundleInst.file = newBundle;
-            }
-        }
-
-        public void DecompressToMemory(BundleFileInstance bundleInst)
-        {
-            AssetBundleFile bundle = bundleInst.file;
-
-            MemoryStream bundleStream = new MemoryStream();
-            bundle.Unpack(new AssetsFileWriter(bundleStream));
-
-            bundleStream.Position = 0;
-
+            // Re-read file to replace instance
             AssetBundleFile newBundle = new AssetBundleFile();
-            newBundle.Read(new AssetsFileReader(bundleStream));
+            newBundle.Read(new AssetsFileReader(File.OpenRead(savePath)));
 
-            bundle.Close();
+            bundleInst.file.Close();
+            bundleInst.file = newBundle;
+        }
+
+        public async void DecompressToMemory(BundleFileInstance bundleInst)
+        {
+            AssetBundleFile newBundle = await _compressionService.DecompressToMemoryAsync(bundleInst.file);
+            bundleInst.file.Close();
             bundleInst.file = newBundle;
         }
 

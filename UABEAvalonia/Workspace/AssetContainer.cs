@@ -22,9 +22,9 @@ namespace UABEAvalonia
         public AssetsFileReader? FileReader { get; private set; }
 
         // deprecated
-        public AssetID AssetId
+        public AssetPPtr AssetId
         {
-            get => new AssetID(FileInstance.path, PathId);
+            get => new AssetPPtr(FileInstance.path, 0, PathId);
         }
         public AssetPPtr AssetPPtr
         {

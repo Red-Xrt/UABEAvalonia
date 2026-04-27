@@ -75,7 +75,7 @@ namespace UABEAvalonia
 
             foreach (var newAsset in assetWs.NewAssets)
             {
-                string file = newAsset.Key.fileName;
+                string file = newAsset.Key.FilePath;
                 if (!fileToTvi.ContainsKey(file))
                 {
                     ModMakerTreeFileInfo newFileItem = new ModMakerTreeFileInfo(file, rootPath);
@@ -246,7 +246,7 @@ namespace UABEAvalonia
 
                         var obsItems = fileItem.Replacers;
                         EmipReplacerWrapper wrapper = (EmipReplacerWrapper)replacer;
-AssetID assetId = new AssetID(file, wrapper.PathId);
+AssetPPtr assetId = new AssetPPtr(file, wrapper.PathId);
 obsItems.Add(new ModMakerTreeReplacerInfo(assetId, wrapper.Replacer));
                     }
                 }
@@ -348,13 +348,13 @@ obsItems.Add(new ModMakerTreeReplacerInfo(assetId, wrapper.Replacer));
     public class ModMakerTreeReplacerInfo
     {
         public bool isBundle;
-        public AssetID assetId;
+        public AssetPPtr assetId;
         public IContentReplacer assetsReplacer;
         //public IContentReplacer bundleReplacer;
 
         public string DisplayText { get => ToString(); }
 
-        public ModMakerTreeReplacerInfo(AssetID assetId, IContentReplacer assetsReplacer)
+        public ModMakerTreeReplacerInfo(AssetPPtr assetId, IContentReplacer assetsReplacer)
         {
             isBundle = false;
             this.assetId = assetId;
@@ -366,9 +366,9 @@ obsItems.Add(new ModMakerTreeReplacerInfo(assetId, wrapper.Replacer));
             if (!isBundle)
             {
                 if (assetsReplacer is ContentRemover)
-                    return $"Remove path id {assetId.pathID}";
+                    return $"Remove path id {assetId.PathId}";
                 else //if (replacer is IContentReplacerFromMemory || replacer is IContentReplacerFromStream)
-                    return $"Replace path id {assetId.pathID}";
+                    return $"Replace path id {assetId.PathId}";
             }
             else
             {

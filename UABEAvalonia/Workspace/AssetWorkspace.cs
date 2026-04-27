@@ -17,13 +17,13 @@ namespace UABEAvalonia
         public List<AssetsFileInstance> LoadedFiles { get; }
         public HashSet<string> LoadedFileNames { get; }
         // todo: replace assetid -> assetpptr
-        public Dictionary<AssetID, AssetContainer> LoadedAssets { get; }
+        public Dictionary<AssetPPtr, AssetContainer> LoadedAssets { get; }
 
         public Dictionary<string, AssetsFileInstance> LoadedFileLookup { get; }
 
-        public Dictionary<AssetID, IContentReplacer> NewAssets { get; }
-        public Dictionary<AssetID, Stream> NewAssetDatas { get; } //for preview in info window
-        public HashSet<AssetID> RemovedAssets { get; }
+        public Dictionary<AssetPPtr, IContentReplacer> NewAssets { get; }
+        public Dictionary<AssetPPtr, Stream> NewAssetDatas { get; } //for preview in info window
+        public HashSet<AssetPPtr> RemovedAssets { get; }
 
         // we have to do this because we want to be able to tell
         // if all changes we've made have been removed so that
@@ -34,7 +34,7 @@ namespace UABEAvalonia
 
         public bool Modified { get; set; }
 
-        public delegate void AssetWorkspaceItemUpdateEvent(AssetsFileInstance file, AssetID assetId);
+        public delegate void AssetWorkspaceItemUpdateEvent(AssetsFileInstance file, AssetPPtr assetId);
         public event AssetWorkspaceItemUpdateEvent? ItemUpdated;
 
         public delegate void MonoTemplateFailureEvent(string path);
@@ -49,13 +49,13 @@ namespace UABEAvalonia
 
             LoadedFiles = new List<AssetsFileInstance>();
             LoadedFileNames = new HashSet<string>();
-            LoadedAssets = new Dictionary<AssetID, AssetContainer>();
+            LoadedAssets = new Dictionary<AssetPPtr, AssetContainer>();
 
             LoadedFileLookup = new Dictionary<string, AssetsFileInstance>();
 
-            NewAssets = new Dictionary<AssetID, IContentReplacer>();
-            NewAssetDatas = new Dictionary<AssetID, Stream>();
-            RemovedAssets = new HashSet<AssetID>();
+            NewAssets = new Dictionary<AssetPPtr, IContentReplacer>();
+            NewAssetDatas = new Dictionary<AssetPPtr, Stream>();
+            RemovedAssets = new HashSet<AssetPPtr>();
 
             OtherAssetChanges = new Dictionary<AssetsFileInstance, AssetsFileChangeTypes>();
 
@@ -67,7 +67,7 @@ namespace UABEAvalonia
         public void AddReplacer(AssetsFileInstance forFile, IContentReplacer replacer, long pathId, int classId, ushort monoId, Stream? previewStream = null)
         {
             AssetsFile assetsFile = forFile.file;
-            AssetID assetId = new AssetID(forFile.path, pathId);
+            AssetPPtr assetId = new AssetPPtr(forFile.path, 0, pathId);
 
             if (NewAssets.ContainsKey(assetId))
                 RemoveReplacer(forFile, NewAssets[assetId], pathId, true);
@@ -106,7 +106,7 @@ namespace UABEAvalonia
 
         public void RemoveReplacer(AssetsFileInstance forFile, IContentReplacer replacer, long pathId, bool closePreviewStream = true)
         {
-            AssetID assetId = new AssetID(forFile.path, pathId);
+            AssetPPtr assetId = new AssetPPtr(forFile.path, 0, pathId);
 
             if (NewAssets.ContainsKey(assetId))
             {
@@ -173,8 +173,8 @@ namespace UABEAvalonia
             HashSet<AssetsFileInstance> changedFiles = new HashSet<AssetsFileInstance>();
             foreach (var newAsset in NewAssets)
             {
-                AssetID assetId = newAsset.Key;
-                string fileName = assetId.fileName;
+                AssetPPtr assetId = newAsset.Key;
+                string fileName = assetId.FilePath;
 
                 if (LoadedFileLookup.TryGetValue(fileName.ToLower(), out AssetsFileInstance? file))
                 {
@@ -248,7 +248,7 @@ namespace UABEAvalonia
 
             if (fileInst != null)
             {
-                AssetID assetId = new AssetID(fileInst.path, pathId);
+                AssetPPtr assetId = new AssetPPtr(fileInst.path, pathId);
                 if (LoadedAssets.TryGetValue(assetId, out AssetContainer? cont))
                 {
                     if (!onlyInfo && !cont.HasValueField)
