@@ -2,9 +2,9 @@ using System.IO;
 using System.Threading.Tasks;
 using AssetsTools.NET;
 
-namespace UABEAvalonia.Services
+namespace UABEAvalonia.Infrastructure.Compression
 {
-    public class CompressionService : ICompressionService
+    public class CompressionService : UABEAvalonia.Services.ICompressionService
     {
         public Task CompressBundleAsync(AssetBundleFile bundleFile, string outputPath, AssetBundleCompressionType compressionType, IAssetBundleCompressProgress progress = null!)
         {

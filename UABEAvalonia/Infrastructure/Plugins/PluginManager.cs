@@ -1,4 +1,5 @@
 using AssetsTools.NET.Extra;
+using UABEAvalonia.Plugins;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UABEAvalonia.Plugins
+namespace UABEAvalonia.Infrastructure.Plugins
 {
     public class PluginManager : UABEAvalonia.Services.IPluginService
     {

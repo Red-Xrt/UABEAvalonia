@@ -574,5 +574,42 @@ namespace UABEAvalonia.ViewModels
                 await _dialogService.ShowMessageBox("Note", "Please open a bundle file before using compress.");
             }
         }
+
+        public async System.Threading.Tasks.Task InitializeAsync()
+        {
+            string classDataPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "classdata.tpk");
+
+            if (System.IO.File.Exists(classDataPath))
+            {
+                _bundleService.LoadClassPackage(classDataPath);
+            }
+            else
+            {
+                await _dialogService.ShowMessageBox("Error", "Missing classdata.tpk by exe.\nPlease make sure it exists.");
+                System.Environment.Exit(1);
+            }
+        }
+
+        public async System.Threading.Tasks.Task<bool> OnClosingAsync()
+        {
+            if (_bundleService.ChangesUnsaved)
+            {
+                var result = await _dialogService.ShowMessageBox("Changes made", "You've modified this file. Would you like to save?", UABEAvalonia.MessageBoxType.YesNoCancel);
+
+                if (result == UABEAvalonia.MessageBoxResult.Cancel)
+                {
+                    return false; // Abort close
+                }
+
+                if (result == UABEAvalonia.MessageBoxResult.Yes)
+                {
+                    if (SaveCommand != null && SaveCommand.CanExecute(null))
+                    {
+                        await SaveCommand.ExecuteAsync(null);
+                    }
+                }
+            }
+            return true; // Allow close
+        }
     }
 }

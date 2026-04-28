@@ -1,3 +1,4 @@
+using UABEAvalonia.Infrastructure.Plugins;
 using AssetsTools.NET.Extra;
 using Avalonia;
 using Avalonia.Controls;

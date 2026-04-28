@@ -1,23 +1,16 @@
 using System;
-using System.IO;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using UABEAvalonia.ViewModels;
 
 namespace UABEAvalonia
 {
     public partial class MainWindow : Window
     {
-        public BundleWorkspace Workspace { get; private set; }
-
         public MainWindow()
         {
             var viewModel = (MainWindowViewModel)AppServices.Provider.GetService(typeof(MainWindowViewModel))!;
             DataContext = viewModel;
-
-            Workspace = ((UABEAvalonia.Services.IBundleService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IBundleService))!).Workspace;
 
             InitializeComponent();
 #if DEBUG
@@ -30,50 +23,25 @@ namespace UABEAvalonia
         protected override async void OnOpened(EventArgs e)
         {
             base.OnOpened(e);
-            string classDataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "classdata.tpk");
-
-            var bundleService = (UABEAvalonia.Services.IBundleService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IBundleService))!;
-            var dialogService = (UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))!;
-
-            if (File.Exists(classDataPath))
+            if (DataContext is MainWindowViewModel vm)
             {
-                bundleService.LoadClassPackage(classDataPath);
-            }
-            else
-            {
-                await dialogService.ShowMessageBox("Error", "Missing classdata.tpk by exe.\nPlease make sure it exists.");
-                Close();
-                Environment.Exit(1);
+                await vm.InitializeAsync();
             }
         }
 
         private async void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            var bundleService = (UABEAvalonia.Services.IBundleService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IBundleService))!;
-            var dialogService = (UABEAvalonia.Services.IDialogService)AppServices.Provider.GetService(typeof(UABEAvalonia.Services.IDialogService))!;
-            var viewModel = (MainWindowViewModel)DataContext!;
-
-            if (bundleService.ChangesUnsaved)
+            if (DataContext is MainWindowViewModel vm)
             {
-                e.Cancel = true;
+                e.Cancel = true; // Prevent immediate closing
 
-                var result = await dialogService.ShowMessageBox("Changes made", "You've modified this file. Would you like to save?", UABEAvalonia.MessageBoxType.YesNoCancel);
+                bool shouldClose = await vm.OnClosingAsync();
 
-                if (result == UABEAvalonia.MessageBoxResult.Cancel)
+                if (shouldClose)
                 {
-                    return; // Abort close
+                    Closing -= MainWindow_Closing;
+                    Close();
                 }
-
-                if (result == UABEAvalonia.MessageBoxResult.Yes)
-                {
-                    if (viewModel.SaveCommand != null && viewModel.SaveCommand.CanExecute(null))
-                    {
-                        await viewModel.SaveCommand.ExecuteAsync(null);
-                    }
-                }
-
-                Closing -= MainWindow_Closing;
-                Close();
             }
         }
     }

@@ -13,7 +13,7 @@ namespace UABEAvalonia.Services
     public interface IJsonDumpService
     {
         void DumpJsonAsset(FileStream wfs, AssetTypeValueField baseField);
-        byte[] ImportJsonAsset(Stream fs, out string? exceptionMessage);
+        byte[] ImportJsonAsset(AssetsTools.NET.AssetTypeTemplateField tempField, Stream fs, out string? exceptionMessage);
     }
 
     public interface IRawExportService

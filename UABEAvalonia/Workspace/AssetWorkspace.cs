@@ -1,3 +1,4 @@
+using UABEAvalonia.Services;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using System;
@@ -9,10 +10,29 @@ using System.Threading.Tasks;
 
 namespace UABEAvalonia
 {
-    public class AssetWorkspace
+    public class AssetWorkspace : UABEAvalonia.Services.IAssetReadRepository, UABEAvalonia.Services.IAssetWriteRepository
     {
         public AssetsManager am { get; }
         public bool fromBundle { get; }
+
+
+        public IReadOnlyList<AssetsFileInstance> ReadOnlyLoadedFiles => LoadedFiles;
+        public IReadOnlyDictionary<AssetPPtr, AssetContainer> ReadOnlyLoadedAssets => LoadedAssets;
+
+        public void AddOrReplaceAsset(AssetContainer cont, AssetTypeValueField baseField)
+        {
+            // Placeholder logic to map to existing NewAssets / NewAssetDatas if needed
+        }
+
+        public void AddOrReplaceAsset(AssetContainer cont, IContentReplacer replacer, System.IO.Stream previewStream)
+        {
+            // Placeholder
+        }
+
+        public void RemoveAsset(AssetContainer cont)
+        {
+            // Placeholder
+        }
 
         public List<AssetsFileInstance> LoadedFiles { get; }
         public HashSet<string> LoadedFileNames { get; }
