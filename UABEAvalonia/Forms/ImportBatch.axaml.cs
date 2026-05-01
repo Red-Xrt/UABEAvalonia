@@ -20,6 +20,7 @@ namespace UABEAvalonia
         public ImportBatch()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.ImportBatchViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

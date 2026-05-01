@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -20,6 +21,8 @@
     <PackageReference Include="Avalonia.Themes.Simple" Version="12.0.1" />
 	<PackageReference Include="Avalonia.Diagnostics" Version="11.3.14" />
 	<PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
+	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Mono.Cecil" Version="0.11.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.5-beta1" />
     <PackageReference Include="Samboy063.LibCpp2IL" Version="2022.1.0-pre-release.21" />

@@ -1,3 +1,4 @@
+using UABEAvalonia.Infrastructure.Plugins;
 using AssetsTools.NET.Extra;
 using Avalonia;
 using Avalonia.Controls;
@@ -19,6 +20,7 @@ namespace UABEAvalonia
         public PluginWindow()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.PluginWindowViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

@@ -1,99 +1,121 @@
 <Window xmlns="https://github.com/avaloniaui"
+        x:CompileBindings="True"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UABEAvalonia"
-        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="500"
-        Width="1100" Height="500"
+        xmlns:models="using:UABEAvalonia.Models"
+        xmlns:vm="using:UABEAvalonia.ViewModels"
+        x:DataType="vm:InfoWindowViewModel"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="1000" Height="700"
+        MinWidth="800" MinHeight="500"
         Icon="/Assets/uabeavalonia16.ico"
         x:Class="UABEAvalonia.InfoWindow"
-        Title="Assets Info"
-        WindowStartupLocation="CenterOwner">
-  <Window.Resources>
-    <local:AssetTypeIconConverter x:Key="AssetTypeIconConverter" />
-  </Window.Resources>
-  <Grid>
-    <Menu Height="22" VerticalAlignment="Top">
-      <MenuItem Header="File">
-        <MenuItem Header="Add" HotKey="Ctrl+N" InputGesture="Ctrl+N" Name="menuAdd" />
-        <MenuItem Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" Name="menuSave" />
-        <MenuItem Header="Save as..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Name="menuSaveAs" />
-        <MenuItem Header="Mod Maker">
-          <MenuItem Header="Create package file" Name="menuCreatePackageFile" />
-        </MenuItem>
-        <MenuItem Header="Close" HotKey="Ctrl+W" InputGesture="Ctrl+W" Name="menuClose" />
+        Title="{Binding Title}"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SystemRegionBrush}">
+
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Margin" Value="2"/>
+      <Setter Property="Padding" Value="8,4"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Margin" Value="2"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto, *, Auto">
+    <Menu Grid.Row="0" Height="32" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,0,0,1">
+      <MenuItem Header="_File">
+        <MenuItem Header="Add" Name="menuAdd" Command="{Binding AddAssetCommand}"  />
+        <MenuItem Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" Name="menuSave" Command="{Binding SaveCommand}"  />
+        <MenuItem Header="Save as..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Name="menuSaveAs" Command="{Binding SaveAsCommand}"  />
+        <MenuItem Header="Create Package File" Name="menuCreatePackageFile" Command="{Binding CreatePackageFileCommand}"  />
+        <MenuItem Header="Close" HotKey="Ctrl+W" InputGesture="Ctrl+W" Name="menuClose" Command="{Binding CloseCommand}"  />
       </MenuItem>
-      <MenuItem Header="View">
-        <MenuItem Header="Search by name" HotKey="Ctrl+F" InputGesture="Ctrl+F" Name="menuSearchByName" />
-        <MenuItem Header="Continue search" InputGesture="F3" Name="menuContinueSearch" />
-        <MenuItem Header="Go to asset" HotKey="Ctrl+G" InputGesture="Ctrl+G" Name="menuGoToAsset" />
-        <MenuItem Header="Filter" HotKey="Ctrl+E" InputGesture="Ctrl+E" Name="menuFilter" />
+      <MenuItem Header="_Search">
+        <MenuItem Header="Search by name" HotKey="Ctrl+F" InputGesture="Ctrl+F" Name="menuSearchByName" Command="{Binding SearchCommand}"  />
+        <MenuItem Header="Continue search" HotKey="F3" InputGesture="F3" Name="menuContinueSearch" Command="{Binding ContinueSearchCommand}"  />
+        <MenuItem Header="Go to asset" HotKey="Ctrl+G" InputGesture="Ctrl+G" Name="menuGoToAsset" Command="{Binding GoToAssetCommand}"  />
       </MenuItem>
-      <MenuItem Header="Tools">
-        <MenuItem Header="Info" HotKey="F4" InputGesture="F4" Name="menuInfo" />
-        <MenuItem Header="Type Tree" HotKey="F5" InputGesture="F5" Name="menuTypeTree" />
-        <MenuItem Header="Dependencies" HotKey="F6" InputGesture="F6" Name="menuDependencies" />
-        <MenuItem Header="Scripts" HotKey="F7" InputGesture="F7" Name="menuScripts" />
-        <MenuItem Header="Scene Hierarchy" HotKey="F8" InputGesture="F8" Name="menuHierarchy" />
+      <MenuItem Header="_View">
+        <MenuItem Header="Filter" Name="menuFilter" Command="{Binding FilterCommand}"  />
+        <MenuItem Header="Info" Name="menuInfo" Command="{Binding InfoCommand}"  />
+        <MenuItem Header="Dependencies" Name="menuDependencies" Command="{Binding DependenciesCommand}"  />
+        <MenuItem Header="Hierarchy" Name="menuHierarchy" Command="{Binding HierarchyCommand}"  />
+        <MenuItem Header="Scripts" Name="menuScripts" Command="{Binding ScriptsCommand}"  />
+        <MenuItem Header="Type tree" Name="menuTypeTree" Command="{Binding TypeTreeCommand}"  />
       </MenuItem>
     </Menu>
-    <Grid Margin="10,32,200,0" VerticalAlignment="Top" ColumnDefinitions="Auto, *">
-      <TextBlock Text="Assets" VerticalAlignment="Center" Margin="0,0,10,0" />
-      <TextBox Grid.Column="1" Name="boxSearch" Watermark="Search by name..." Height="20" />
+
+    <Grid Grid.Row="1" Margin="10">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" MinWidth="180" />
+      </Grid.ColumnDefinitions>
+
+      <Border Grid.Column="0" CornerRadius="4" BorderBrush="{DynamicResource SystemControlDefaultBaseLowBrush}" BorderThickness="1" Margin="0,0,10,0">
+        <DataGrid Name="dataGrid" ItemsSource="{Binding Assets}" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="All">
+          <DataGrid.Resources>
+            <local:AssetTypeIconConverter x:Key="IconConverter" />
+          </DataGrid.Resources>
+          <DataGrid.Columns>
+            <DataGridTemplateColumn Header="Name" Width="2*">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate x:DataType="models:AssetInfoDataGridItem">
+                  <Grid ColumnDefinitions="Auto, *">
+                    <Image Grid.Column="0" Source="{Binding TypeClass, Converter={StaticResource IconConverter}}" Width="16" Height="16" Margin="4,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <DataGridTextColumn Header="Container" Binding="{Binding Container}" Width="2*" />
+            <DataGridTextColumn Header="Path ID" Binding="{Binding PathID}" Width="*" />
+            <DataGridTextColumn Header="File ID" Binding="{Binding FileID}" Width="*" />
+            <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="*" />
+            <DataGridTextColumn Header="Type ID" Binding="{Binding TypeID}" Width="*" />
+            <DataGridTextColumn Header="Size" Binding="{Binding Size}" Width="*" />
+            <DataGridTextColumn Header="Modified" Binding="{Binding Modified}" Width="*" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </Border>
+
+      <Border Grid.Column="1" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" CornerRadius="4" Padding="10">
+        <StackPanel Spacing="5">
+          <TextBlock Text="Asset Actions" FontWeight="SemiBold" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+          <Button HorizontalAlignment="Stretch" Name="btnViewData" Command="{Binding ViewDataCommand}"  Content="View Data" Classes="accent"/>
+          <Button HorizontalAlignment="Stretch" Name="btnEditData" Command="{Binding EditDataCommand}"  Content="Edit Data" />
+          <Button HorizontalAlignment="Stretch" Name="btnSceneView" Command="{Binding SceneViewCommand}"  Content="Scene View" />
+          <Separator Margin="0,5"/>
+          <Button HorizontalAlignment="Stretch" Name="btnExportRaw" Command="{Binding ExportRawCommand}"  Content="Export Raw" />
+          <Button HorizontalAlignment="Stretch" Name="btnExportDump" Command="{Binding ExportDumpCommand}"  Content="Export Dump" />
+          <Button HorizontalAlignment="Stretch" Name="btnPlugin" Command="{Binding PluginCommand}"  Content="Plugins" />
+          <Separator Margin="0,5"/>
+          <Button HorizontalAlignment="Stretch" Name="btnImportRaw" Command="{Binding ImportRawCommand}"  Content="Import Raw" />
+          <Button HorizontalAlignment="Stretch" Name="btnImportDump" Command="{Binding ImportDumpCommand}"  Content="Import Dump" />
+          <Button HorizontalAlignment="Stretch" Name="btnRemove" Command="{Binding RemoveCommand}"  Content="Remove" Foreground="#D32F2F" />
+        </StackPanel>
+      </Border>
     </Grid>
-    <Border Margin="10,65,200,10" BorderBrush="Black" BorderThickness="1">
-      <DataGrid AutoGenerateColumns="False" CanUserResizeColumns="True" IsReadOnly="True" Name="dataGrid">
-        <DataGrid.RowTheme>
-          <ControlTheme TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
-            <ControlTheme.Children>
-              <Style Selector="^:nth-child(2n)">
-                <Setter Property="Background" Value="#00FFFFFF" />
-              </Style>
-            </ControlTheme.Children>
-          </ControlTheme>
-        </DataGrid.RowTheme>
-        <DataGrid.Columns>
-          <DataGridTemplateColumn Header=" ">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate x:DataType="local:AssetInfoDataGridItem">
-                <Image Source="{Binding TypeClass, Converter={StaticResource AssetTypeIconConverter}}" Width="16" Height="16" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-          <DataGridTextColumn Header="Name" Binding="{ReflectionBinding Name}"/>
-          <DataGridTextColumn Header="Container" Binding="{ReflectionBinding Container}"/>
-          <DataGridTextColumn Header="Type" Binding="{ReflectionBinding Type}"/>
-          <DataGridTextColumn Header="File ID" Binding="{ReflectionBinding FileID}"/>
-          <DataGridTextColumn Header="Path ID" Binding="{ReflectionBinding PathID}"/>
-          <DataGridTextColumn Header="Size" Binding="{ReflectionBinding Size}"/>
-          <DataGridTextColumn Header="Modified" Binding="{ReflectionBinding Modified}"/>
-        </DataGrid.Columns>
-      </DataGrid>
-    </Border>
-    <StackPanel Margin="0,53,10,10" HorizontalAlignment="Right" Width="185">
-      <Label Content="Name"/>
-      <TextBox TextWrapping="WrapWithOverflow" Text="" IsReadOnly="True" Name="boxName" />
-      <Label Content="Path ID"/>
-      <TextBox TextWrapping="WrapWithOverflow" Text="" IsReadOnly="True" Name="boxPathId" />
-      <Label Content="File ID"/>
-      <TextBox TextWrapping="WrapWithOverflow" Text="" IsReadOnly="True" Name="boxFileId" />
-      <Label Content="Type"/>
-      <TextBox TextWrapping="WrapWithOverflow" Text="" IsReadOnly="True" Name="boxType" />
-      <UniformGrid Columns="2"  >
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="View Data" Name="btnViewData" Margin="5"/>
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="View Scene" Name="btnSceneView" Margin="5"/>
 
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Import Raw" Name="btnImportRaw" Margin="5"/>
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Export Raw" Name="btnExportRaw" Margin="5"/>
-
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Import Dump" Name="btnImportDump" Margin="5"/>
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Export Dump" Name="btnExportDump" Margin="5"/>
-
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Edit Data" Name="btnEditData" Margin="5"/>
-        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Remove" Name="btnRemove" Margin="5"/>
-      </UniformGrid>
-      <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Plugins" Name="btnPlugin" Margin="5"/>
-
-    </StackPanel>
+    <Grid Grid.Row="2" Margin="10,0,10,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Column="0" Name="boxSearch" Watermark="Search by name..." />
+        <TextBox Grid.Column="1" Name="boxName" IsReadOnly="True" Watermark="Name" />
+        <TextBox Grid.Column="2" Name="boxPathId" IsReadOnly="True" Watermark="Path ID" />
+        <TextBox Grid.Column="3" Name="boxFileId" IsReadOnly="True" Watermark="File ID" />
+        <TextBox Grid.Column="4" Name="boxType" IsReadOnly="True" Watermark="Type" />
+    </Grid>
   </Grid>
 </Window>

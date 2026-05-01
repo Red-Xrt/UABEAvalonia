@@ -17,6 +17,7 @@ namespace UABEAvalonia
         public FilterAssetTypeDialog()
         {
             InitializeComponent();
+            DataContext = AppServices.Provider.GetService(typeof(UABEAvalonia.ViewModels.FilterAssetTypeDialogViewModel));
 #if DEBUG
             this.AttachDevTools();
 #endif

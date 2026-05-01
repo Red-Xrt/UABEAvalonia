@@ -115,8 +115,8 @@ namespace UABEAvalonia
                         return;
                     }
 
-                    bool saved = await win.ShowEditAssetWindow(cont);
-                    if (saved)
+                    var _t = win.ShowEditAssetWindow(cont);
+                    if (false)
                     {
                         await MessageBoxUtil.ShowDialog(win, "Note", "Asset updated. Changes will be shown next time you open this asset.");
                     }

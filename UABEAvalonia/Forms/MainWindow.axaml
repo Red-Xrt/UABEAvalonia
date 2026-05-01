@@ -3,73 +3,107 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UABEAvalonia"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="150"
-        Width="400" Height="150"
+        xmlns:vm="using:UABEAvalonia.ViewModels"
+        x:DataType="vm:MainWindowViewModel"
+        x:CompileBindings="True"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        Width="800" Height="600"
+        MinWidth="600" MinHeight="400"
         Icon="/Assets/uabeavalonia16.ico"
         x:Class="UABEAvalonia.MainWindow"
-        Title="UABEA"
+        Title="UABEA - Universal Asset Bundle Extractor"
         DragDrop.AllowDrop="True"
-        WindowStartupLocation="CenterOwner">
-  <Grid>
-    <Menu Height="22" VerticalAlignment="Top" Name="menuMain">
-      <MenuItem Header="File">
-        <MenuItem Header="Open" HotKey="Ctrl+O" InputGesture="Ctrl+O" Name="menuOpen" />
-        <MenuItem Header="Load Package File" HotKey="Ctrl+P" InputGesture="Ctrl+P" Name="menuLoadPackageFile" />
-        <MenuItem Header="Close" HotKey="Ctrl+W" InputGesture="Ctrl+W" Name="menuClose" />
-        <MenuItem Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" Name="menuSave" />
-        <MenuItem Header="Save as..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Name="menuSaveAs" />
-        <Separator />
-        <MenuItem Header="Compress" HotKey="Ctrl+M" InputGesture="Ctrl+M" Name="menuCompress" />
-        <MenuItem Header="Exit" HotKey="Ctrl+Q" InputGesture="Ctrl+Q" Name="menuExit" />
-      </MenuItem>
-      <MenuItem Header="Options">
-        <MenuItem Header="Toggle Dark Theme" Name="menuToggleDarkTheme" />
-        <MenuItem Header="Enable/Disable Cpp2Il" Name="menuToggleCpp2Il" />
-      </MenuItem>
-      <MenuItem Header="Help">
-        <MenuItem Header="About..." Name="menuAbout" />
-      </MenuItem>
-    </Menu>
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource SystemRegionBrush}">
 
-    <TextBlock Margin="10,32,10,0" VerticalAlignment="Top" Text="No file opened." TextAlignment="Center" FontWeight="Bold" FontSize="14" Name="lblFileName" />
-    <ComboBox Margin="10,56,10,0" VerticalAlignment="Top" Height="30" IsEnabled="False" Name="comboBox">
-      <ComboBox.ItemTemplate>
-        <DataTemplate x:DataType="local:BundleWorkspaceItem">
-          <TextBlock Text="{Binding}" Foreground="{Binding Color}" />
-        </DataTemplate>
-      </ComboBox.ItemTemplate>
-    </ComboBox>
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Margin" Value="2"/>
+      <Setter Property="Padding" Value="10,5"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="TextBlock.SectionHeader">
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Margin" Value="0,0,0,10"/>
+      <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
+  </Window.Styles>
 
-    <Grid Margin="10,87,10,0" VerticalAlignment="Top" Grid.IsSharedSizeScope="True">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="*"></RowDefinition>
-        <RowDefinition Height="*"></RowDefinition>
-      </Grid.RowDefinitions>
-      <Grid Grid.Row="0">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Button Grid.Column="0" HorizontalAlignment="Left" IsEnabled="False" Name="btnExport" Width="90" Height="26">Export</Button>
-        <Button Grid.Column="1" HorizontalAlignment="Left" IsEnabled="False" Name="btnExportAll" Width="90" Height="26">Export All</Button>
-        <Button Grid.Column="2" HorizontalAlignment="Left" IsEnabled="False" Name="btnRename" Width="90" Height="26">Rename</Button>
-        <Grid  Grid.Column="3" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,29,19,0">
-          <Button HorizontalAlignment="Left" IsEnabled="False" Name="btnInfo" Width="95" Height="55">Info</Button>
-        </Grid>
-      </Grid>
-      <Grid Grid.Row="1">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-          <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Button Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" IsEnabled="False" Name="btnImport" Width="90">Import</Button>
-        <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" IsEnabled="False" Name="btnImportAll" Width="90">Import All</Button>
-        <Button Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" IsEnabled="False" Name="btnRemove" Width="90">Remove</Button>
-      </Grid>
+  <Grid RowDefinitions="Auto, *">
+    <!-- Modern Menu Bar -->
+    <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,0,0,1">
+      <Menu Height="32" VerticalAlignment="Center" Name="menuMain">
+        <MenuItem Header="_File">
+          <MenuItem Header="Open" HotKey="Ctrl+O" InputGesture="Ctrl+O" Name="menuOpen" Command="{Binding OpenFileCommand}" />
+          <MenuItem Header="Load Package File" HotKey="Ctrl+P" InputGesture="Ctrl+P" Name="menuLoadPackageFile" />
+          <MenuItem Header="Close" HotKey="Ctrl+W" InputGesture="Ctrl+W" Name="menuClose" />
+          <MenuItem Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" Name="menuSave" />
+          <MenuItem Header="Save as..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Name="menuSaveAs" />
+          <Separator />
+          <MenuItem Header="Compress" HotKey="Ctrl+M" InputGesture="Ctrl+M" Name="menuCompress" />
+          <MenuItem Header="Exit" HotKey="Ctrl+Q" InputGesture="Ctrl+Q" Name="menuExit" />
+        </MenuItem>
+        <MenuItem Header="_Options">
+          <MenuItem Header="Toggle Dark Theme" Name="menuToggleDarkTheme" />
+          <MenuItem Header="Enable/Disable Cpp2Il" Name="menuToggleCpp2Il" />
+        </MenuItem>
+        <MenuItem Header="_Help">
+          <MenuItem Header="About..." Name="menuAbout" />
+        </MenuItem>
+      </Menu>
+    </Border>
+
+    <!-- Main Content Layout -->
+    <Grid Grid.Row="1" Margin="20">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <!-- Central Action Panel -->
+      <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="8" Padding="20" BoxShadow="0 4 10 0 #20000000">
+        <StackPanel Spacing="15" VerticalAlignment="Center" MaxWidth="500">
+
+          <TextBlock Classes="SectionHeader" Text="Workspace Overview" HorizontalAlignment="Center" />
+
+          <Border Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" CornerRadius="4" Padding="15">
+            <TextBlock Text="{Binding FileName}" TextAlignment="Center" FontWeight="Normal" FontSize="14" Name="lblFileName" TextWrapping="Wrap" />
+          </Border>
+
+          <ComboBox ItemsSource="{Binding Files}" SelectedItem="{Binding SelectedFile}" HorizontalAlignment="Stretch" Height="35" IsEnabled="{Binding IsWorkspaceActive}" Name="comboBox" Margin="0,10,0,20">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="local:BundleWorkspaceItem">
+                <TextBlock Text="{Binding}" Foreground="{Binding Color}" VerticalAlignment="Center" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+
+          <Button Content="Asset Info" HorizontalAlignment="Stretch" IsEnabled="{Binding HasAssets}" Name="btnInfo" Command="{Binding OpenInfoCommand}" Height="45" Classes="accent" FontSize="16" FontWeight="SemiBold"/>
+
+          <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" Margin="0,10,0,0">
+            <!-- Left Column: Export/Rename -->
+            <StackPanel Grid.Column="0" Grid.Row="0" Spacing="5" Margin="0,0,5,0">
+              <Button Content="Export" HorizontalAlignment="Stretch" IsEnabled="{Binding HasAssets}" Name="btnExport" Command="{Binding ExportCommand}" />
+              <Button Content="Rename" HorizontalAlignment="Stretch" IsEnabled="{Binding HasAssets}" Name="btnRename" Command="{Binding RenameCommand}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="0" Grid.Row="1" Spacing="5" Margin="0,5,5,0">
+              <Button Content="Export All" HorizontalAlignment="Stretch" IsEnabled="{Binding HasAssets}" Name="btnExportAll" Command="{Binding ExportAllCommand}" />
+            </StackPanel>
+
+            <!-- Right Column: Import/Remove -->
+            <StackPanel Grid.Column="1" Grid.Row="0" Spacing="5" Margin="5,0,0,0">
+              <Button Content="Import" HorizontalAlignment="Stretch" IsEnabled="{Binding IsWorkspaceActive}" Name="btnImport" Command="{Binding ImportCommand}" />
+              <Button Content="Remove" HorizontalAlignment="Stretch" IsEnabled="{Binding HasAssets}" Name="btnRemove" Command="{Binding RemoveCommand}" Foreground="#D32F2F"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Grid.Row="1" Spacing="5" Margin="5,5,0,0">
+              <Button Content="Import All" HorizontalAlignment="Stretch" IsEnabled="{Binding IsWorkspaceActive}" Name="btnImportAll" Command="{Binding ImportAllCommand}" />
+            </StackPanel>
+          </Grid>
+
+        </StackPanel>
+      </Border>
     </Grid>
   </Grid>
 </Window>

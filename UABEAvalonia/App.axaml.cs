@@ -15,6 +15,8 @@ namespace UABEAvalonia
 
         public override void OnFrameworkInitializationCompleted()
         {
+            AppServices.Initialize();
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();
