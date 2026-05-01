@@ -29,6 +29,11 @@ namespace UABEAvalonia.ViewModels
         [ObservableProperty]
         private string searchText = string.Empty;
 
+        partial void OnSearchTextChanged(string value)
+        {
+            UpdateFilteredAssets(value);
+        }
+
         [ObservableProperty]
         private string selectedName = string.Empty;
 
@@ -44,9 +49,17 @@ namespace UABEAvalonia.ViewModels
         [ObservableProperty]
         private AssetInfoDataGridItem? selectedAsset;
 
-        private int searchStart;
-        private bool searchDown;
-        private bool searchCaseSensitive;
+        [ObservableProperty]
+        private System.Collections.IList? selectedAssets;
+
+        private int searchStart = 0;
+        private bool searchDown = false;
+        private bool searchCaseSensitive = true;
+        private bool searching = false;
+
+        private HashSet<AssetClassID> filteredOutTypeIds = new HashSet<AssetClassID>();
+
+        private UABEAvalonia.Infrastructure.Plugins.PluginManager pluginManager;
 
         public InfoWindowViewModel() {}
 
@@ -54,6 +67,8 @@ namespace UABEAvalonia.ViewModels
         {
             _dialogService = dialogService;
             _windowService = windowService;
+            pluginManager = new UABEAvalonia.Infrastructure.Plugins.PluginManager();
+            pluginManager.LoadPluginsInDirectory(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"));
         }
 
         public void Init(AssetWorkspace workspace)

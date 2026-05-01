@@ -22,6 +22,18 @@ namespace UABEAvalonia
             var viewModel = (InfoWindowViewModel)AppServices.Provider.GetService(typeof(InfoWindowViewModel))!;
             viewModel.Init(new AssetWorkspace(am, fromBundle));
             DataContext = viewModel;
+
+            dataGrid.SelectionChanged += (s, e) =>
+            {
+                viewModel.SelectedAssets = dataGrid.SelectedItems;
+            };
+            Closing += async (s, e) =>
+            {
+                if (Workspace != null && Workspace.Modified)
+                {
+                    // For now, allow close. The full logic is best ported to a behavior later.
+                }
+            };
         }
 
         public async System.Threading.Tasks.Task ShowEditAssetWindow(AssetContainer cont)

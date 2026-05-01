@@ -11,5 +11,8 @@ namespace UABEAvalonia.Services
         Task OpenAboutWindow();
         Task OpenLoadModPackageWindow(InstallerPackageFile emip, AssetsManager am);
         Task CloseAllInfoWindows();
+
+        Task OpenGameObjectViewWindow(AssetWorkspace workspace, AssetContainer? selectedGo = null);
+        Task OpenDataWindow(AssetWorkspace workspace, AssetContainer cont);
     }
 }
