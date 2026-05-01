@@ -59,7 +59,7 @@
       </Grid.ColumnDefinitions>
 
       <Border Grid.Column="0" CornerRadius="4" BorderBrush="{DynamicResource SystemControlDefaultBaseLowBrush}" BorderThickness="1" Margin="0,0,10,0">
-        <DataGrid Name="dataGrid" ItemsSource="{Binding Assets}" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="All">
+        <DataGrid Name="dataGrid" ItemsSource="{Binding Assets}" SelectedItem="{Binding SelectedAsset}" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="All">
           <DataGrid.Resources>
             <local:AssetTypeIconConverter x:Key="IconConverter" />
           </DataGrid.Resources>
@@ -111,11 +111,11 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0" Name="boxSearch" PlaceholderText="Search by name..." />
-        <TextBox Grid.Column="1" Name="boxName" IsReadOnly="True" PlaceholderText="Name" />
-        <TextBox Grid.Column="2" Name="boxPathId" IsReadOnly="True" PlaceholderText="Path ID" />
-        <TextBox Grid.Column="3" Name="boxFileId" IsReadOnly="True" PlaceholderText="File ID" />
-        <TextBox Grid.Column="4" Name="boxType" IsReadOnly="True" PlaceholderText="Type" />
+        <TextBox Grid.Column="0" Name="boxSearch" Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search by name..." />
+        <TextBox Grid.Column="1" Name="boxName" Text="{Binding SelectedName}" IsReadOnly="True" PlaceholderText="Name" />
+        <TextBox Grid.Column="2" Name="boxPathId" Text="{Binding SelectedPathId}" IsReadOnly="True" PlaceholderText="Path ID" />
+        <TextBox Grid.Column="3" Name="boxFileId" Text="{Binding SelectedFileId}" IsReadOnly="True" PlaceholderText="File ID" />
+        <TextBox Grid.Column="4" Name="boxType" Text="{Binding SelectedType}" IsReadOnly="True" PlaceholderText="Type" />
     </Grid>
   </Grid>
 </Window>

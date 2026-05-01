@@ -395,12 +395,16 @@ namespace UABEAvalonia.ViewModels
                 IContentReplacer replacer = newAsset.Value;
                 int fileId = assetId.FileId;
 
-                if (Workspace.LoadedFiles.Count > assetId.FileId && (file = Workspace.LoadedFiles[assetId.FileId]) != null)
+                if (Workspace.LoadedFiles.Count > fileId)
                 {
-                    if (!fileToReplacer.ContainsKey(file))
-                        fileToReplacer[file] = new List<IContentReplacer>();
+                    var file = Workspace.LoadedFiles[fileId];
+                    if (file != null)
+                    {
+                        if (!fileToReplacer.ContainsKey(file))
+                            fileToReplacer[file] = new List<IContentReplacer>();
 
-                    fileToReplacer[file].Add(replacer);
+                        fileToReplacer[file].Add(replacer);
+                    }
                 }
             }
 
@@ -609,25 +613,278 @@ namespace UABEAvalonia.ViewModels
             return true;
         }
 
-        private void UpdateFilteredAssets()
+        private void UpdateFilteredAssets(string? searchTextOverride = null)
         {
             LoadAssets();
+
+            var textToSearch = searchTextOverride != null ? searchTextOverride.ToLower() : SearchText?.ToLower() ?? string.Empty;
+
+            var filteredAssets = Assets.ToList();
+
             if (filteredOutTypeIds.Count > 0)
             {
-                var filteredAssets = Assets.Where(a => !filteredOutTypeIds.Contains(a.TypeClass)).ToList();
+                filteredAssets = filteredAssets.Where(a => !filteredOutTypeIds.Contains(a.TypeClass)).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(textToSearch))
+            {
+                filteredAssets = filteredAssets.Where(a =>
+                    (a.Name != null && a.Name.ToLower().Contains(textToSearch)) ||
+                    (a.Type != null && a.Type.ToLower().Contains(textToSearch))
+                ).ToList();
+            }
+
+            if (filteredAssets.Count != Assets.Count)
+            {
                 Assets.Clear();
                 foreach (var a in filteredAssets) Assets.Add(a);
             }
         }
 
-        // Stubs for long implementations
-        private async Task BatchExportRaw(List<AssetContainer> selection) { }
-        private async Task SingleExportRaw(List<AssetContainer> selection) { }
-        private async Task BatchExportDump(List<AssetContainer> selection) { }
-        private async Task SingleExportDump(List<AssetContainer> selection) { }
-        private async Task BatchImportRaw(List<AssetContainer> selection) { }
-        private async Task SingleImportRaw(List<AssetContainer> selection) { }
-        private async Task BatchImportDump(List<AssetContainer> selection) { }
-        private async Task SingleImportDump(List<AssetContainer> selection) { }
+        private async Task BatchExportRaw(List<AssetContainer> selection)
+        {
+            var selectedFolderPaths = await _dialogService.OpenFolderDialog("Select export directory");
+            if (selectedFolderPaths.Length == 0) return;
+
+            string dir = selectedFolderPaths[0];
+
+            foreach (AssetContainer selectedCont in selection)
+            {
+                AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+                AssetNameUtils.GetDisplayNameFast(Workspace, selectedCont, false, out string assetName, out string _);
+                assetName = PathUtils.ReplaceInvalidPathChars(assetName);
+                string file = Path.Combine(dir, $"{assetName}-{Path.GetFileName(selectedInst.path)}-{selectedCont.PathId}.dat");
+
+                using (FileStream fs = File.Open(file, FileMode.Create))
+                {
+                    AssetImportExport dumper = new AssetImportExport();
+                    dumper.DumpRawAsset(fs, selectedCont.FileReader, selectedCont.FilePosition, selectedCont.Size);
+                }
+            }
+        }
+
+        private async Task SingleExportRaw(List<AssetContainer> selection)
+        {
+            AssetContainer selectedCont = selection[0];
+            AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+            AssetNameUtils.GetDisplayNameFast(Workspace, selectedCont, false, out string assetName, out string _);
+            assetName = PathUtils.ReplaceInvalidPathChars(assetName);
+
+            string? selectedFilePath = await _dialogService.SaveFileDialog("Save as...", $"{assetName}-{Path.GetFileName(selectedInst.path)}-{selectedCont.PathId}", new List<string> { "*.dat", "*.*" });
+            if (selectedFilePath == null) return;
+
+            using (FileStream fs = File.Open(selectedFilePath, FileMode.Create))
+            {
+                AssetImportExport dumper = new AssetImportExport();
+                dumper.DumpRawAsset(fs, selectedCont.FileReader, selectedCont.FilePosition, selectedCont.Size);
+            }
+        }
+
+        private async Task BatchExportDump(List<AssetContainer> selection)
+        {
+            var selectedFolderPaths = await _dialogService.OpenFolderDialog("Select export directory");
+            if (selectedFolderPaths.Length == 0) return;
+
+            string dir = selectedFolderPaths[0];
+
+            string? extension = await _dialogService.ShowSelectDumpWindow(true);
+            if (extension == null) return;
+
+            foreach (AssetContainer selectedCont in selection)
+            {
+                AssetNameUtils.GetDisplayNameFast(Workspace, selectedCont, false, out string assetName, out string _);
+                assetName = PathUtils.ReplaceInvalidPathChars(assetName);
+                string file = Path.Combine(dir, $"{assetName}-{Path.GetFileName(selectedCont.FileInstance.path)}-{selectedCont.PathId}.{extension}");
+
+                using (FileStream fs = File.Open(file, FileMode.Create))
+                using (StreamWriter sw = new StreamWriter(fs))
+                {
+                    AssetTypeValueField? baseField = Workspace.GetBaseField(selectedCont);
+
+                    if (baseField == null)
+                    {
+                        sw.WriteLine("Asset failed to deserialize.");
+                        continue;
+                    }
+
+                    AssetImportExport dumper = new AssetImportExport();
+                    if (extension == "json")
+                        dumper.DumpJsonAsset(sw, baseField);
+                    else
+                        dumper.DumpTextAsset(sw, baseField);
+                }
+            }
+        }
+
+        private async Task SingleExportDump(List<AssetContainer> selection)
+        {
+            AssetContainer selectedCont = selection[0];
+            AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+            AssetNameUtils.GetDisplayNameFast(Workspace, selectedCont, false, out string assetName, out string _);
+            assetName = PathUtils.ReplaceInvalidPathChars(assetName);
+
+            string? selectedFilePath = await _dialogService.SaveFileDialog("Save as...", $"{assetName}-{Path.GetFileName(selectedInst.path)}-{selectedCont.PathId}", new List<string> { "*.txt", "*.json" });
+            if (selectedFilePath == null) return;
+
+            using (FileStream fs = File.Open(selectedFilePath, FileMode.Create))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                AssetTypeValueField? baseField = Workspace.GetBaseField(selectedCont);
+
+                if (baseField == null)
+                {
+                    sw.WriteLine("Asset failed to deserialize.");
+                    return;
+                }
+
+                AssetImportExport dumper = new AssetImportExport();
+
+                if (selectedFilePath.EndsWith(".json"))
+                    dumper.DumpJsonAsset(sw, baseField);
+                else
+                    dumper.DumpTextAsset(sw, baseField);
+            }
+        }
+
+        private async Task BatchImportRaw(List<AssetContainer> selection)
+        {
+            var selectedFolderPaths = await _dialogService.OpenFolderDialog("Select import directory");
+            if (selectedFolderPaths.Length == 0) return;
+
+            string dir = selectedFolderPaths[0];
+            List<string> extensions = new List<string>() { "dat" };
+
+            var batchInfos = await _dialogService.ShowImportBatchWindow(Workspace, selection, dir, extensions);
+            if (batchInfos != null)
+            {
+                foreach (var batchInfo in batchInfos)
+                {
+                    string selectedFilePath = batchInfo.importFile;
+                    AssetContainer selectedCont = batchInfo.cont;
+                    AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+                    using (FileStream fs = File.OpenRead(selectedFilePath))
+                    {
+                        AssetImportExport importer = new AssetImportExport();
+                        byte[] bytes = importer.ImportRawAsset(fs);
+
+                        IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                        Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
+                    }
+                }
+            }
+        }
+
+        private async Task SingleImportRaw(List<AssetContainer> selection)
+        {
+            AssetContainer selectedCont = selection[0];
+            AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+            var selectedFilePaths = await _dialogService.OpenFileDialog("Open", false, new List<string> { "*.dat" });
+            if (selectedFilePaths.Length == 0) return;
+
+            string file = selectedFilePaths[0];
+
+            using (FileStream fs = File.OpenRead(file))
+            {
+                AssetImportExport importer = new AssetImportExport();
+                byte[] bytes = importer.ImportRawAsset(fs);
+
+                IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
+            }
+        }
+
+        private async Task BatchImportDump(List<AssetContainer> selection)
+        {
+            var selectedFolderPaths = await _dialogService.OpenFolderDialog("Select import directory");
+            if (selectedFolderPaths.Length == 0) return;
+
+            string dir = selectedFolderPaths[0];
+
+            string? extension = await _dialogService.ShowSelectDumpWindow(false);
+            if (extension == null) return;
+
+            List<string> extensions = extension == "any" ? SelectDumpWindow.ALL_EXTENSIONS : new List<string>() { extension };
+
+            var batchInfos = await _dialogService.ShowImportBatchWindow(Workspace, selection, dir, extensions);
+            if (batchInfos != null)
+            {
+                foreach (var batchInfo in batchInfos)
+                {
+                    string selectedFilePath = batchInfo.importFile;
+                    AssetContainer selectedCont = batchInfo.cont;
+                    AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+                    using (FileStream fs = File.OpenRead(selectedFilePath))
+                    using (StreamReader sr = new StreamReader(fs))
+                    {
+                        AssetImportExport importer = new AssetImportExport();
+                        byte[]? bytes;
+                        string? exceptionMessage;
+
+                        if (selectedFilePath.EndsWith(".json"))
+                        {
+                            AssetTypeTemplateField tempField = Workspace.GetTemplateField(selectedCont);
+                            bytes = importer.ImportJsonAsset(tempField, sr, out exceptionMessage);
+                        }
+                        else
+                        {
+                            bytes = importer.ImportTextAsset(sr, out exceptionMessage);
+                        }
+
+                        if (bytes == null)
+                        {
+                            await _dialogService.ShowMessageBox("Parse error", "Something went wrong when reading the dump file:\n" + exceptionMessage);
+                            return;
+                        }
+
+                        IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                        Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
+                    }
+                }
+            }
+        }
+
+        private async Task SingleImportDump(List<AssetContainer> selection)
+        {
+            AssetContainer selectedCont = selection[0];
+            AssetsFileInstance selectedInst = selectedCont.FileInstance;
+
+            var selectedFilePaths = await _dialogService.OpenFileDialog("Open", false, new List<string> { "*.txt", "*.json" });
+            if (selectedFilePaths.Length == 0) return;
+
+            string file = selectedFilePaths[0];
+
+            using (FileStream fs = File.OpenRead(file))
+            using (StreamReader sr = new StreamReader(fs))
+            {
+                AssetImportExport importer = new AssetImportExport();
+                byte[]? bytes = null;
+                string? exceptionMessage = null;
+
+                if (file.EndsWith(".json"))
+                {
+                    AssetTypeTemplateField tempField = Workspace.GetTemplateField(selectedCont);
+                    bytes = importer.ImportJsonAsset(tempField, sr, out exceptionMessage);
+                }
+                else
+                {
+                    bytes = importer.ImportTextAsset(sr, out exceptionMessage);
+                }
+
+                if (bytes == null)
+                {
+                    await _dialogService.ShowMessageBox("Parse error", "Something went wrong when reading the dump file:\n" + exceptionMessage);
+                    return;
+                }
+
+                IContentReplacer replacer = AssetImportExport.CreateAssetReplacer(selectedCont, bytes);
+                Workspace.AddReplacer(selectedInst, replacer, selectedCont.PathId, selectedCont.ClassId, selectedCont.MonoId, new MemoryStream(bytes));
+            }
+        }
     }
 }

@@ -29,6 +29,11 @@ namespace UABEAvalonia.ViewModels
         [ObservableProperty]
         private string searchText = string.Empty;
 
+        partial void OnSearchTextChanged(string value)
+        {
+            UpdateFilteredAssets(value);
+        }
+
         [ObservableProperty]
         private string selectedName = string.Empty;
 
