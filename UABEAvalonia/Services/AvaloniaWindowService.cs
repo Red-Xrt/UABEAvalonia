@@ -71,5 +71,27 @@ namespace UABEAvalonia.Services
             }
             return Task.CompletedTask;
         }
+
+        public async Task OpenGameObjectViewWindow(AssetWorkspace workspace, AssetContainer? selectedGo = null)
+        {
+            var mainWindow = GetMainWindow();
+            if (mainWindow != null)
+            {
+                var dialog = selectedGo != null
+                    ? new UABEAvalonia.GameObjectViewWindow(null!, workspace, selectedGo)
+                    : new UABEAvalonia.GameObjectViewWindow(null!, workspace);
+                dialog.Show(mainWindow);
+            }
+        }
+
+        public async Task OpenDataWindow(AssetWorkspace workspace, AssetContainer cont)
+        {
+            var mainWindow = GetMainWindow();
+            if (mainWindow != null)
+            {
+                var dialog = new UABEAvalonia.DataWindow(null!, workspace, cont);
+                dialog.Show(mainWindow);
+            }
+        }
     }
 }
