@@ -30,14 +30,16 @@ namespace UABEAvalonia.Services
             return Enumerable.Empty<Window>();
         }
 
-        public async Task OpenInfoWindow(AssetsManager assetsManager, List<AssetsFileInstance> assetsFiles, bool fromBundle)
+        public async Task<InfoWindow> OpenInfoWindow(AssetsManager assetsManager, List<AssetsFileInstance> assetsFiles, bool fromBundle)
         {
             var mainWindow = GetMainWindow();
             if (mainWindow != null)
             {
                 var infoWindow = new UABEAvalonia.InfoWindow(assetsManager, assetsFiles, fromBundle);
                 infoWindow.Show(mainWindow); // Show modeless for info windows
+                return infoWindow;
             }
+            return null;
         }
 
         public async Task OpenAboutWindow()
