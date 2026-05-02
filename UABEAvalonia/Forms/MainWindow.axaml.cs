@@ -1,7 +1,11 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using UABEAvalonia.ViewModels;
+using System.Collections.Generic;
 
 namespace UABEAvalonia
 {
@@ -18,6 +22,7 @@ namespace UABEAvalonia
 #endif
 
             Closing += MainWindow_Closing;
+            AddHandler(DragDrop.DropEvent, Drop);
         }
 
         protected override async void OnOpened(EventArgs e)
@@ -43,6 +48,11 @@ namespace UABEAvalonia
                     Close();
                 }
             }
+        }
+
+        private void Drop(object? sender, DragEventArgs e)
+        {
+            // Fallback empty handle to resolve build errors for now
         }
     }
 }

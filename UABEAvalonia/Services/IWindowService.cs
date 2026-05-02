@@ -7,7 +7,7 @@ namespace UABEAvalonia.Services
 {
     public interface IWindowService
     {
-        Task OpenInfoWindow(AssetsManager assetsManager, List<AssetsFileInstance> assetsFiles, bool fromBundle);
+        Task<InfoWindow> OpenInfoWindow(AssetsManager assetsManager, List<AssetsFileInstance> assetsFiles, bool fromBundle);
         Task OpenAboutWindow();
         Task OpenLoadModPackageWindow(InstallerPackageFile emip, AssetsManager am);
         Task CloseAllInfoWindows();

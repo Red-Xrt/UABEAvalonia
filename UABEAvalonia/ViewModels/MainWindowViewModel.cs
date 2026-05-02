@@ -1,3 +1,4 @@
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -52,6 +53,11 @@ namespace UABEAvalonia.ViewModels
             await OpenFilesInternal(selectedFiles);
         }
 
+        public async Task OpenFilesInternalAsync(string[] files)
+        {
+            await OpenFilesInternal(files);
+        }
+
         private async Task OpenFilesInternal(string[] files)
         {
             string selectedFile = files[0];
@@ -85,31 +91,9 @@ namespace UABEAvalonia.ViewModels
             {
                 AssetsFileInstance fileInst = await _bundleService.LoadAssetsFile(selectedFile);
 
-                if (!await _bundleService.LoadOrAskTypeData(fileInst, "0.0.0")) // Simple pass for now, will be updated to ask properly
-                {
-                    string uVer = fileInst.file.Metadata.UnityVersion;
-                    if (uVer == "0.0.0" && fileInst.parentBundle != null)
-                    {
-                        uVer = fileInst.parentBundle.file.Header.EngineVersion;
-                    }
-                    if (uVer == "0.0.0")
-                    {
-                        uVer = await _dialogService.AskForVersion(uVer);
-                        if (uVer == string.Empty)
-                        {
-                            if (!fileInst.file.Metadata.TypeTreeEnabled)
-                            {
-                                await _dialogService.ShowMessageBox("Error", "You must enter a Unity version to load a typetree-stripped file.");
-                                return;
-                            }
-                            else
-                            {
-                                uVer = "0.0.0";
-                            }
-                        }
-                    }
-                    await _bundleService.LoadOrAskTypeData(fileInst, uVer);
-                }
+                bool typeDataLoaded = await EnsureTypeDataLoadedAsync(fileInst);
+                if (!typeDataLoaded)
+                    return;
 
                 List<AssetsFileInstance> fileInstances = new List<AssetsFileInstance>();
                 fileInstances.Add(fileInst);
@@ -131,7 +115,11 @@ namespace UABEAvalonia.ViewModels
                     }
                 }
 
-                _windowService.OpenInfoWindow(_bundleService.AssetsManager, fileInstances, false);
+                var infoWindow = await _windowService.OpenInfoWindow(_bundleService.AssetsManager, fileInstances, false);
+                if (infoWindow != null)
+                {
+                    infoWindow.Closed += (s, e) => { OnInfoWindowClosed(infoWindow); };
+                }
             }
             else if (fileType == DetectedFileType.BundleFile)
             {
@@ -198,15 +186,20 @@ namespace UABEAvalonia.ViewModels
                 // Real application would abstract the instantiation process directly into the BundleService.
 
                 string assetMemPath = System.IO.Path.Combine(BundleInst.path, name);
-                AssetsFileInstance fileInst = _bundleService.AssetsManager.LoadAssetsFile(assetStream, assetMemPath, true);
+                AssetsFileInstance fileInst = _bundleService.AssetsManager.LoadAssetsFile(assetStream, assetMemPath, true, BundleInst);
 
                 if (BundleInst != null && fileInst.parentBundle == null)
                     fileInst.parentBundle = BundleInst;
 
-                if (!await _bundleService.LoadOrAskTypeData(fileInst, "0.0.0"))
+                bool typeDataLoaded = await EnsureTypeDataLoadedAsync(fileInst);
+                if (!typeDataLoaded)
                     return;
 
-                _windowService.OpenInfoWindow(_bundleService.AssetsManager, new List<AssetsFileInstance> { fileInst }, true);
+                var infoWindow = await _windowService.OpenInfoWindow(_bundleService.AssetsManager, new List<AssetsFileInstance> { fileInst }, true);
+                if (infoWindow != null)
+                {
+                    infoWindow.Closed += (s, e) => { OnInfoWindowClosed(infoWindow); };
+                }
             }
             else
             {
@@ -610,6 +603,65 @@ namespace UABEAvalonia.ViewModels
                 }
             }
             return true; // Allow close
+        }
+                private void OnInfoWindowClosed(UABEAvalonia.InfoWindow window)
+        {
+            if (window.Workspace.fromBundle && window.Workspace.Modified)
+            {
+                var changedFiles = window.Workspace.GetChangedFiles();
+                foreach (var fileInst in changedFiles)
+                {
+                    string assetName = System.IO.Path.GetFileName(fileInst.path);
+
+                    System.IO.MemoryStream ms = new System.IO.MemoryStream();
+                    AssetsTools.NET.AssetsFileWriter writer = new AssetsTools.NET.AssetsFileWriter(ms);
+                    fileInst.file.Write(writer, 0);
+                    ms.Position = 0;
+
+                    _bundleService.AddOrReplaceFile(ms, assetName, true);
+                    _bundleService.AssetsManager.UnloadAssetsFile(fileInst.path);
+                }
+
+                if (changedFiles.Count > 0)
+                {
+                    // Refresh view
+                    var currentFile = SelectedFile;
+                    Files.Clear();
+                    foreach (var item in _bundleService.Workspace.Files) Files.Add(item);
+
+                    if (currentFile != null)
+                    {
+                        foreach (var f in Files) if (f.Name == currentFile.Name) SelectedFile = f;
+                    }
+                }
+            }
+        }
+
+        private async Task<bool> EnsureTypeDataLoadedAsync(AssetsFileInstance fileInst)
+        {
+            string uVer = fileInst.file.Metadata.UnityVersion;
+            if (uVer == "0.0.0" && fileInst.parentBundle != null)
+            {
+                uVer = fileInst.parentBundle.file.Header.EngineVersion;
+            }
+
+            if (uVer == "0.0.0")
+            {
+                uVer = await _dialogService.AskForVersion(uVer);
+                if (uVer == string.Empty)
+                {
+                    if (!fileInst.file.Metadata.TypeTreeEnabled)
+                    {
+                        await _dialogService.ShowMessageBox("Error", "You must enter a Unity version to load a typetree-stripped file.");
+                        return false;
+                    }
+                    else
+                    {
+                        uVer = "0.0.0";
+                    }
+                }
+            }
+            return await _bundleService.LoadOrAskTypeData(fileInst, uVer);
         }
     }
 }
