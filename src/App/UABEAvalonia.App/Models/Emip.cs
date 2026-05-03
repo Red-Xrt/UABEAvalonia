@@ -3,9 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using AssetsTools.NET;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models.Workspace;
+using UABEAvalonia.Services;
+using UABEAvalonia.Services;
 
-namespace UABEAvalonia.Logic
+namespace UABEAvalonia.Models
 {
+    using UABEAvalonia.Services;
+
     public class InstallerPackageFile
     {
         public string magic;

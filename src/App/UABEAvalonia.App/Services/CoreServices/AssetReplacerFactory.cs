@@ -1,9 +1,14 @@
 using AssetsTools.NET;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models.Workspace;
+using UABEAvalonia.Services;
+using UABEAvalonia.Services;
 using System.IO;
 
-namespace UABEAvalonia.Logic
+namespace UABEAvalonia.Services
 {
-    public static partial class AssetImportExport
+    public static class AssetReplacerFactory
     {
         public static IContentReplacer CreateAssetReplacer(AssetContainer cont, byte[] data)
         {

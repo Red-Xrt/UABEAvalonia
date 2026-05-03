@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TexturePlugin
 {
-    public class PInvoke
+    public class NativeInterop
     {
         [DllImport("textoolwrap")]
         public static extern uint DecodeByCrunchUnity(IntPtr data, IntPtr buf, int mode, uint width, uint height, uint byteSize);

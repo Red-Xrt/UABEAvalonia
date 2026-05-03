@@ -3,31 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UABEAvalonia", "UABEAvalonia\UABEAvalonia.csproj", "{5DF4DE55-1498-470C-A7FC-A7D64A15F2E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UABEAvalonia", "src\App\UABEAvalonia.App\UABEAvalonia.csproj", "{5DF4DE55-1498-470C-A7FC-A7D64A15F2E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexturePlugin", "TexturePlugin\TexturePlugin.csproj", "{253D4BE6-A4B4-4215-9CB3-3858EFA3FB5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexturePlugin", "src\Plugins\TexturePlugin\TexturePlugin.csproj", "{253D4BE6-A4B4-4215-9CB3-3858EFA3FB5E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexturePluginPreview", "TexturePluginPreview\TexturePluginPreview.csproj", "{407F80BC-7B93-40DB-ADE0-DD4BCC749D1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexturePluginPreview", "src\Plugins\TexturePluginPreview\TexturePluginPreview.csproj", "{407F80BC-7B93-40DB-ADE0-DD4BCC749D1C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextAssetPlugin", "TextAssetPlugin\TextAssetPlugin.csproj", "{B334A509-14E0-4413-83C7-BA2439A40394}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextAssetPlugin", "src\Plugins\TextAssetPlugin\TextAssetPlugin.csproj", "{B334A509-14E0-4413-83C7-BA2439A40394}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioClipPlugin", "AudioClipPlugin\AudioClipPlugin.csproj", "{57B84056-BCA6-4D18-BBE1-59305F7ED5B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioClipPlugin", "src\Plugins\AudioClipPlugin\AudioClipPlugin.csproj", "{57B84056-BCA6-4D18-BBE1-59305F7ED5B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontPlugin", "FontPlugin\FontPlugin.csproj", "{9C582792-C3AA-4854-9DB5-26AF330ACDDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontPlugin", "src\Plugins\FontPlugin\FontPlugin.csproj", "{9C582792-C3AA-4854-9DB5-26AF330ACDDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET", "AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj", "{8DAA6B1F-C8A2-49EA-909E-DDE7F314231F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET", "src\Core\AssetTools.NET\AssetsTools.NET.csproj", "{8DAA6B1F-C8A2-49EA-909E-DDE7F314231F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AssetsTools", "AssetsTools", "{A91FCCC7-6E25-C51E-E433-F1E99188679C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AssetsTools", "AssetsTools", "{84B3971B-3BE9-4DAC-754D-21FE1E8E30B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET.Texture", "AssetsTools\AssetsTools\AssetsTools.NET.Texture\AssetsTools.NET.Texture.csproj", "{FE61711E-F9F5-44B9-8682-DF9317D14CF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET.Texture", "src\Core\AssetsTools.NET.Texture\AssetsTools.NET.Texture.csproj", "{FE61711E-F9F5-44B9-8682-DF9317D14CF1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AssetTools.NET", "AssetTools.NET", "{B47C9335-ADB3-020B-B7DB-5AD6876AACCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET.MonoCecil", "AssetsTools\AssetsTools\AssetsTools.NET.MonoCecil\AssetsTools.NET.MonoCecil.csproj", "{DBBCA2FF-CFDD-4442-B9F9-046F4E1B1609}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET.MonoCecil", "src\Core\AssetsTools.NET.MonoCecil\AssetsTools.NET.MonoCecil.csproj", "{DBBCA2FF-CFDD-4442-B9F9-046F4E1B1609}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET.Cpp2IL", "AssetsTools\AssetsTools\AssetsTools.NET.Cpp2IL\AssetsTools.NET.Cpp2IL.csproj", "{ACD4551F-D7CF-4708-91C9-26174F19D815}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetsTools.NET.Cpp2IL", "src\Core\AssetsTools.NET.Cpp2IL\AssetsTools.NET.Cpp2IL.csproj", "{ACD4551F-D7CF-4708-91C9-26174F19D815}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

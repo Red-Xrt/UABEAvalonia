@@ -174,7 +174,7 @@ namespace TexturePlugin
                 {
                     IntPtr dataIntPtr = (IntPtr)dataPtr;
                     IntPtr destIntPtr = (IntPtr)destPtr;
-                    size = PInvoke.DecodeByPVRTexLib(dataIntPtr, destIntPtr, (int)format, (uint)width, (uint)height);
+                    size = NativeInterop.DecodeByPVRTexLib(dataIntPtr, destIntPtr, (int)format, (uint)width, (uint)height);
                 }
             }
             if (size > 0)
@@ -202,7 +202,7 @@ namespace TexturePlugin
                 {
                     IntPtr dataIntPtr = (IntPtr)dataPtr;
                     IntPtr destIntPtr = (IntPtr)destPtr;
-                    size = PInvoke.DecodeByCrunchUnity(dataIntPtr, destIntPtr, (int)format, (uint)width, (uint)height, (uint)data.Length);
+                    size = NativeInterop.DecodeByCrunchUnity(dataIntPtr, destIntPtr, (int)format, (uint)width, (uint)height, (uint)data.Length);
                 }
             }
             if (size > 0)
@@ -223,7 +223,7 @@ namespace TexturePlugin
                 {
                     IntPtr dataIntPtr = (IntPtr)dataPtr;
                     IntPtr destIntPtr = (IntPtr)destPtr;
-                    size = PInvoke.EncodeByISPC(dataIntPtr, destIntPtr, (int)format, quality, (uint)width, (uint)height);
+                    size = NativeInterop.EncodeByISPC(dataIntPtr, destIntPtr, (int)format, quality, (uint)width, (uint)height);
                 }
             }
 
@@ -261,7 +261,7 @@ namespace TexturePlugin
                 {
                     IntPtr dataIntPtr = (IntPtr)dataPtr;
                     IntPtr destIntPtr = (IntPtr)destPtr;
-                    size = PInvoke.EncodeByPVRTexLib(dataIntPtr, destIntPtr, (int)format, quality, (uint)width, (uint)height);
+                    size = NativeInterop.EncodeByPVRTexLib(dataIntPtr, destIntPtr, (int)format, quality, (uint)width, (uint)height);
                 }
             }
 
@@ -303,7 +303,7 @@ namespace TexturePlugin
                     // encoded with an older version of Crunch" not sure if this breaks older games though
                     // todo: determine version ranges
                     IntPtr dataIntPtr = (IntPtr)dataPtr;
-                    size = PInvoke.EncodeByCrunchUnity(dataIntPtr, ref checkoutId, (int)format, quality, (uint)width, (uint)height, 1, mips);
+                    size = NativeInterop.EncodeByCrunchUnity(dataIntPtr, ref checkoutId, (int)format, quality, (uint)width, (uint)height, 1, mips);
                     if (size == 0)
                     {
                         return null;
@@ -315,7 +315,7 @@ namespace TexturePlugin
                 fixed (byte* destPtr = dest)
                 {
                     IntPtr destIntPtr = (IntPtr)destPtr;
-                    if (!PInvoke.PickUpAndFree(destIntPtr, size, checkoutId))
+                    if (!NativeInterop.PickUpAndFree(destIntPtr, size, checkoutId))
                     {
                         return null;
                     }

@@ -15,11 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UABEAvalonia\UABEAvalonia.csproj" />
+    <ProjectReference Include="..\..\App\UABEAvalonia.App\UABEAvalonia.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AssetsTools\AssetsTools\AssetTools.NET\AssetsTools.NET.csproj" />
+    <ProjectReference Include="..\..\Core\AssetTools.NET\AssetsTools.NET.csproj" />
     
   </ItemGroup>
   

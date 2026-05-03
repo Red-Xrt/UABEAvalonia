@@ -1,4 +1,9 @@
 using AssetsTools.NET;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models.Workspace;
+using UABEAvalonia.Services;
+using UABEAvalonia.Services;
 using AssetsTools.NET.Extra;
 using Avalonia;
 using Avalonia.Controls;
@@ -10,7 +15,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
-using UABEAvalonia.Logic;
+using UABEAvalonia.Models;
+using UABEAvalonia.Services;
 
 namespace UABEAvalonia
 {
