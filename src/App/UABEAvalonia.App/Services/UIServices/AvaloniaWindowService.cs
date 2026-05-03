@@ -4,7 +4,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AssetsTools.NET.Extra;
-using UABEAvalonia.Logic;
+using UABEAvalonia.Models;
+using UABEAvalonia.Services;
 using UABEAvalonia.ViewModels;
 using System.Linq;
 

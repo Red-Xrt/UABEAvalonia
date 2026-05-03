@@ -1,6 +1,12 @@
 using AssetsTools.NET;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models.Workspace;
+using UABEAvalonia.Services;
+using UABEAvalonia.Services;
 using Avalonia;
-using UABEAvalonia.Logic;
+using UABEAvalonia.Models;
+using UABEAvalonia.Services;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using System.Collections.Generic;

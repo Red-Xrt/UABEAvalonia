@@ -1,6 +1,11 @@
 using System.IO;
 using System.Threading.Tasks;
 using AssetsTools.NET;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models.Workspace;
+using UABEAvalonia.Services;
+using UABEAvalonia.Services;
 
 namespace UABEAvalonia.Infrastructure.Compression
 {

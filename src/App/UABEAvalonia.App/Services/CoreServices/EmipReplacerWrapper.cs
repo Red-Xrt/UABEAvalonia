@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
 using AssetsTools.NET;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models;
+using UABEAvalonia.Models.Workspace;
+using UABEAvalonia.Services;
+using UABEAvalonia.Services;
 
-namespace UABEAvalonia.Logic
+namespace UABEAvalonia.Services
 {
     public class EmipReplacerWrapper
     {
